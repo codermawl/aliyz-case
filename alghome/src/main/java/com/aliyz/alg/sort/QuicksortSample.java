@@ -1,4 +1,4 @@
-package com.aliyz.example.sort;
+package com.aliyz.alg.sort;
 
 /**
  * All rights Reserved, Designed By www.aliyz.com
