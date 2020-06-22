@@ -9,5 +9,5 @@ package com.aliyz.example.sort;
  */
 public class QuicksortSample {
 
-    
+
 }
