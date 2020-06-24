@@ -1,1 +1,6 @@
 alghome/.idea
+alghome/out
+alghome/target
+plugin/.idea
+plugin/out
+plugin/target
