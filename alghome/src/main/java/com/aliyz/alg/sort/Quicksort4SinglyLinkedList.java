@@ -1,6 +1,5 @@
 package com.aliyz.alg.sort;
 
-import com.alibaba.fastjson.JSON;
 import lombok.Data;
 
 /**
@@ -14,7 +13,7 @@ public class Quicksort4SinglyLinkedList {
 
 
     public static void main(String[] args) {
-        int[] arr = {9, 5, 1, 22, 2, 4, 8, 7, 6, 66, 34};
+        int[] arr = {9, 5, 1, 22, 2, 4, 8, 7, 2, 6, 66, 34};
         int[] arr0 = {0};
         int[] arr1 = {2, 1};
         SLL sll = buildSLL(arr);
@@ -44,6 +43,7 @@ public class Quicksort4SinglyLinkedList {
         Node p = head, q = head.nextNode;
         int TEMP_key = head.key; // 支点值
         boolean flag = false; // p、q指针移动标识：true-p指针移动；false-q指针移动，这里先移动q指针
+        boolean isDone = false;
 
         while (true) {
             if (flag) {
@@ -64,8 +64,8 @@ public class Quicksort4SinglyLinkedList {
                 }
             } else {
                 while (true) {
-                    if (q == null) {
-                        break;
+                    if (q.equals(tail)) {
+                        isDone = true; // q指针已经走到最后一个节点，标记本次流程结束标识
                     }
 
                     if (q.key < TEMP_key) {
@@ -81,16 +81,20 @@ public class Quicksort4SinglyLinkedList {
                     } else {
                         q = q.nextNode;
                     }
+
+                    if (isDone) {
+                        break;
+                    }
                 }
             }
 
-            if (q == null) {
+            if (isDone) {
                 p.key = TEMP_key;
                 break;
             }
         }
 
-//        System.out.println(">>>当前状态: " + printNode(head));
+        System.out.println(">>>当前状态: " + printNode(head));
         sort(head, p);
         sort(p.nextNode, tail);
 
