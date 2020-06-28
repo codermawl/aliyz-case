@@ -3,51 +3,19 @@ package com.aliyz.alg.sudoku;
 import java.util.*;
 
 /**
- * All rights Reserved, Designed By www.aliyz.com
+ * All rights Reserved, Designed By www.tusdao.com
  *
- * <p>简单的数独算法</p>
- * Created by aliyz at 2020-06-25 18:20
- * Copyright: 2020 www.aliyz.com Inc. All rights reserved.
+ * <p></p>
+ * Created by mawl at 2020-06-28 14:48
+ * Copyright: 2020 www.tusdao.com Inc. All rights reserved.
  */
-public class SudokuSample {
+public class Sudoku2 {
 
-    private static int[][] table9x9 = new int[9][9];
-    private static final Map<String, Grid> GRID_CACHE = new HashMap<>();
+    /** -------------------------------------------数独逻辑--------------------------------------------------- */
+    private final int[][] table9x9 = new int[9][9];
+    private final Map<String, Grid> GRID_CACHE = new HashMap<>();
 
-    public static void main(String[] args) {
-        String promNumStr = "3,4,7,9,0,0,0,0,0\n" +
-                            "1,2,0,0,0,0,5,0,0";
-
-        String[] rows = promNumStr.split("\n");
-        for (int i=0; i<rows.length; i++) {
-            if (i > 8) {
-                break;
-            }
-
-            String[] promNums = rows[i].split(",");
-            for (int j=0; j<9; j++) {
-                int prom = Integer.valueOf(promNums[j]);
-                if (prom > 0) {
-                    table9x9[i][j] = prom;
-                    getAndCreateGrid(i, j, true);
-                }
-            }
-        }
-
-        if (!checkAll(table9x9)) {
-            throw new RuntimeException("输入提示数错误。");
-        }
-
-        System.out.println(">>初始化完毕：" + Util.array4Print(table9x9));
-        System.out.println(">>开始计算...");
-        long start = System.currentTimeMillis();
-        dododo(getAndCreateGrid(0, 0));
-        System.out.println(String.format(">>计算完成，耗时：[%s]ms，结果：%s\n",
-                (System.currentTimeMillis() - start), Util.array4Print(table9x9)));
-
-    }
-
-    public static boolean dododo (Grid grid) {
+    public boolean dododo (Grid grid) {
         if (grid == null) {
             return true; // 结束
         }
@@ -57,13 +25,13 @@ public class SudokuSample {
         } else {
             // 开始填数
             while (true) {
-                int preNum = grid.getPreNum();
+                int preNum = grid.takeOne();
                 if (preNum == 0) {
                     grid.resetPIdx();
                     return false;
                 } else {
                     table9x9[grid.r][grid.c] = preNum;
-                    if (checkUnit(table9x9, grid.r, grid.c) && dododo(tripNext(grid))) {
+                    if (checkUnit(grid.r, grid.c) && dododo(tripNext(grid))) {
                         return true; // 填数成功，返回
                     } else {
                         table9x9[grid.r][grid.c] = 0;
@@ -73,7 +41,7 @@ public class SudokuSample {
         }
     }
 
-    public static Grid tripNext (Grid c_grid) {
+    private Grid tripNext (Grid c_grid) {
         int c_r = c_grid.r, c_c = c_grid.c;
         if ((0 <= c_r && c_r < 9) && (0 <= c_c && c_c < 8)) {
             return getAndCreateGrid(c_r, ++c_c);
@@ -85,11 +53,11 @@ public class SudokuSample {
     }
 
 
-    public static Grid getAndCreateGrid (int r, int c) {
+    public Grid getAndCreateGrid (int r, int c) {
         return getAndCreateGrid(r, c, false);
     }
 
-    public static Grid getAndCreateGrid (int r, int c, boolean isProm) {
+    public Grid getAndCreateGrid (int r, int c, boolean isProm) {
         if (r > 8 || c > 8) {
             return null;
         }
@@ -107,6 +75,37 @@ public class SudokuSample {
         }
     }
 
+    public void setValue (int r, int c, int val) {
+        table9x9[r][c] = val;
+    }
+
+    @Override
+    public String toString () {
+        return Util.formatString(table9x9);
+    }
+
+    public void clean () {
+        Util.cleanArray(table9x9);
+        GRID_CACHE.clear();
+    }
+
+    public boolean checkAll () {
+        return checkAll(table9x9);
+    }
+
+    public boolean checkUnit (int r, int c) {
+        return checkUnit(table9x9, r, c);
+    }
+
+    public int[][] getTable9x9() {
+        return table9x9;
+    }
+
+
+
+
+
+    /** --------------------------------------------静态区-------------------------------------------------- */
 
     public static boolean checkAll (int[][] a) {
         for (int r=0; r<9; r++) { // 检查所有行
@@ -215,7 +214,7 @@ public class SudokuSample {
             return r + "" + c;
         }
 
-        public int getPreNum () {
+        public int takeOne () {
             if (p_idx == 9) {
                 return 0;
             }
@@ -354,7 +353,7 @@ public class SudokuSample {
         }
 
 
-        public static String array4Print(int[][] a) {
+        public static String formatString(int[][] a) {
             String formatPattern = "    \n" +
                     "    +-------------------------------------+\n" +
                     "    | %d | %d | %d || %d | %d | %d || %d | %d | %d |\n" +
