@@ -1,6 +1,35 @@
+.DS_Store
+
+## --------------------^^alghome^^------------------- ##
 alghome/.idea
 alghome/out
 alghome/target
+
+alghome/.DS_Store
+alghome/src/.DS_Store
+alghome/src/main/.DS_Store
+alghome/src/main/java/.DS_Store
+alghome/src/main/java/com/.DS_Store
+
+## --------------------^^plugin^^------------------- ##
 plugin/.idea
 plugin/out
 plugin/target
+
+plugin/.DS_Store
+plugin/src/.DS_Store
+plugin/src/main/.DS_Store
+plugin/src/main/java/.DS_Store
+plugin/src/main/java/com/.DS_Store
+
+## --------------------^^practice^^------------------- ##
+practice/.idea
+practice/out
+practice/target
+
+practice/.DS_Store
+practice/src/.DS_Store
+practice/src/main/.DS_Store
+practice/src/main/java/.DS_Store
+practice/src/main/java/com/.DS_Store
+
