@@ -181,7 +181,7 @@ public class SudokuSample {
         /** 提示数标识：0-不是提示数；1-是提示数，运算过程中不可被擦拭重写 */
         private int prom;
         /** 预选数集合 */
-        private int[] preNums = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        private static int[] preNums = {1, 2, 3, 4, 5, 6, 7, 8, 9};
         /** 预选数指针，用于标记当前格子所填的数字在预选数集合中的索引 */
         private int p_idx;
 
@@ -226,7 +226,7 @@ public class SudokuSample {
         }};
         /** 根据 行、列 获取宫索引 */
         static int getBoxIndexByRC(int r, int c) {
-            return RC_B_Mapper.get(String.format("%d%d", r, c));
+            return RC_B_Mapper.get(Grid.genID(r, c));
         }
 
         /** 根据 宫索引 获取 行R 起始索引 */
