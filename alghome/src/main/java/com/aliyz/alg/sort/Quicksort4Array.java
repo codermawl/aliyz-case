@@ -10,14 +10,14 @@ package com.aliyz.alg.sort;
 public class Quicksort4Array {
 
     public static void main(String[] args) {
-        int arr[] = {32, 77, 23, 10, 2, 2, 12, 0, 8, 9, 1, 111, 34};
+        int[] arr = {32, 77, 23, 10, 2, 2, 12, 0, 8, 9, 1, 111, 34};
 
         System.out.println("排序前：" + SortUtil.toPrint(arr));
         sort(arr, 0, arr.length - 1);
         System.out.println("排序后：" + SortUtil.toPrint(arr));
     }
 
-    public static void sort (int[] arr, int L, int R) {
+    private static void sort(int[] arr, int L, int R) {
 
         if (L >= R) {
             return;

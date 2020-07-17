@@ -14,8 +14,6 @@ public class Quicksort4SinglyLinkedList {
 
     public static void main(String[] args) {
         int[] arr = {9, 5, 1, 22, 2, 4, 8, 7, 2, 6, 66, 34};
-        int[] arr0 = {0};
-        int[] arr1 = {2, 1};
         SLL sll = buildSLL(arr);
         System.out.println("排序前：" + printNode(sll.head));
 
@@ -31,10 +29,10 @@ public class Quicksort4SinglyLinkedList {
      * @param head
      * @param tail
      * @return: void
-     * @Author: mawl
+     * @Author: aliyz
      * @Date: 2020-06-24 15:55
      **/
-    public static void sort (Node head, Node tail) {
+    private static void sort(Node head, Node tail) {
 
         if (head == null || head.equals(tail)) {
             return;
@@ -107,7 +105,7 @@ public class Quicksort4SinglyLinkedList {
      * @Author: mawl
      * @Date: 2020-06-24 19:21
      **/
-    public static SLL buildSLL (int[] keys) {
+    private static SLL buildSLL(int[] keys) {
         SLL sll = new SLL();
         Node node = new Node(keys[keys.length - 1], null);
         sll.tail = node;
@@ -122,7 +120,7 @@ public class Quicksort4SinglyLinkedList {
 
 
     @Data
-    static class SLL {
+    private static class SLL {
         private Node head;
         private Node tail;
     }
@@ -132,14 +130,14 @@ public class Quicksort4SinglyLinkedList {
         private int key;
         private Node nextNode;
 
-        public Node (int key, Node nextNode) {
+        Node(int key, Node nextNode) {
             this.key = key;
             this.nextNode = nextNode;
         }
     }
 
-    public static String printNode (Node head) {
-        StringBuffer sb = new StringBuffer();
+    private static String printNode(Node head) {
+        StringBuilder sb = new StringBuilder();
         sb.append("{");
         while (true) {
             sb.append(head.key);
