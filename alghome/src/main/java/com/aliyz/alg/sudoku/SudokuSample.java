@@ -5,49 +5,17 @@ import java.util.*;
 /**
  * All rights Reserved, Designed By www.aliyz.com
  *
- * <p>简单的数独算法</p>
- * Created by aliyz at 2020-06-25 18:20
+ * <p></p>
+ * Created by aliyz at 2020-06-28 14:48
  * Copyright: 2020 www.aliyz.com Inc. All rights reserved.
  */
 public class SudokuSample {
 
-    private static int[][] table9x9 = new int[9][9];
-    private static final Map<String, Grid> GRID_CACHE = new HashMap<>();
+    /** -------------------------------------------数独逻辑--------------------------------------------------- */
+    private final int[][] table9x9 = new int[9][9];
+    private final Map<String, Grid> GRID_CACHE = new HashMap<>();
 
-    public static void main(String[] args) {
-        String promNumStr = "3,4,7,9,0,0,0,0,0\n" +
-                            "1,2,0,0,0,0,5,0,0";
-
-        String[] rows = promNumStr.split("\n");
-        for (int i=0; i<rows.length; i++) {
-            if (i > 8) {
-                break;
-            }
-
-            String[] promNums = rows[i].split(",");
-            for (int j=0; j<9; j++) {
-                int prom = Integer.valueOf(promNums[j]);
-                if (prom > 0) {
-                    table9x9[i][j] = prom;
-                    getAndCreateGrid(i, j, true);
-                }
-            }
-        }
-
-        if (!checkAll(table9x9)) {
-            throw new RuntimeException("输入提示数错误。");
-        }
-
-        System.out.println(">>初始化完毕：" + Util.array4Print(table9x9));
-        System.out.println(">>开始计算...");
-        long start = System.currentTimeMillis();
-        dododo(getAndCreateGrid(0, 0));
-        System.out.println(String.format(">>计算完成，耗时：[%s]ms，结果：%s\n",
-                (System.currentTimeMillis() - start), Util.array4Print(table9x9)));
-
-    }
-
-    public static boolean dododo (Grid grid) {
+    boolean dododo(Grid grid) {
         if (grid == null) {
             return true; // 结束
         }
@@ -57,13 +25,13 @@ public class SudokuSample {
         } else {
             // 开始填数
             while (true) {
-                int preNum = grid.getPreNum();
+                int preNum = grid.takeOne();
                 if (preNum == 0) {
                     grid.resetPIdx();
                     return false;
                 } else {
                     table9x9[grid.r][grid.c] = preNum;
-                    if (checkUnit(table9x9, grid.r, grid.c) && dododo(tripNext(grid))) {
+                    if (checkUnit(grid.r, grid.c) && dododo(tripNext(grid))) {
                         return true; // 填数成功，返回
                     } else {
                         table9x9[grid.r][grid.c] = 0;
@@ -73,7 +41,7 @@ public class SudokuSample {
         }
     }
 
-    public static Grid tripNext (Grid c_grid) {
+    private Grid tripNext (Grid c_grid) {
         int c_r = c_grid.r, c_c = c_grid.c;
         if ((0 <= c_r && c_r < 9) && (0 <= c_c && c_c < 8)) {
             return getAndCreateGrid(c_r, ++c_c);
@@ -85,11 +53,11 @@ public class SudokuSample {
     }
 
 
-    public static Grid getAndCreateGrid (int r, int c) {
+    Grid getAndCreateGrid(int r, int c) {
         return getAndCreateGrid(r, c, false);
     }
 
-    public static Grid getAndCreateGrid (int r, int c, boolean isProm) {
+    Grid getAndCreateGrid(int r, int c, boolean isProm) {
         if (r > 8 || c > 8) {
             return null;
         }
@@ -107,8 +75,32 @@ public class SudokuSample {
         }
     }
 
+    void setValue(int r, int c, int val) {
+        table9x9[r][c] = val;
+    }
 
-    public static boolean checkAll (int[][] a) {
+    @Override
+    public String toString () {
+        return Util.formatString(table9x9);
+    }
+
+    void clean() {
+        Util.cleanArray(table9x9);
+        GRID_CACHE.clear();
+    }
+
+    boolean checkAll() {
+        return checkAll(table9x9);
+    }
+
+    private boolean checkUnit(int r, int c) {
+        return checkUnit(table9x9, r, c);
+    }
+
+
+    /** --------------------------------------------静态区-------------------------------------------------- */
+
+    private static boolean checkAll(int[][] a) {
         for (int r=0; r<9; r++) { // 检查所有行
             if (!checkRow(a, r)) {
                 return false;
@@ -130,12 +122,8 @@ public class SudokuSample {
         return true;
     }
 
-    public static boolean checkUnit (int[][] a, int r, int c) {
-        if (checkRow(a, r) && checkCol(a, c) && checkBox(a, Util.getBoxIndexByRC(r, c))) {
-            return true;
-        }
-
-        return  false;
+    private static boolean checkUnit(int[][] a, int r, int c) {
+        return checkRow(a, r) && checkCol(a, c) && checkBox(a, Util.getBoxIndexByRC(r, c));
     }
 
     /** 检查行 */
@@ -188,8 +176,6 @@ public class SudokuSample {
         private int r;
         /** 列索引 */
         private int c;
-        /** 宫索引 */
-        private int b;
         /** 格ID */
         private String id;
         /** 提示数标识：0-不是提示数；1-是提示数，运算过程中不可被擦拭重写 */
@@ -199,30 +185,28 @@ public class SudokuSample {
         /** 预选数指针，用于标记当前格子所填的数字在预选数集合中的索引 */
         private int p_idx;
 
-        public Grid (int r, int c) {
+        Grid(int r, int c) {
             this.r = r;
             this.c = c;
-            this.b = Util.getBoxIndexByRC(r, c);
             this.id = genID(r, c);
         }
 
-        public Grid toProm () {
+        void toProm() {
             this.prom = 1;
-            return this;
         }
 
-        public static String genID (int r, int c) {
+        static String genID(int r, int c) {
             return r + "" + c;
         }
 
-        public int getPreNum () {
+        int takeOne() {
             if (p_idx == 9) {
                 return 0;
             }
             return preNums[p_idx++];
         }
 
-        public void resetPIdx () {
+        void resetPIdx() {
             this.p_idx = 0;
         }
     }
@@ -241,12 +225,12 @@ public class SudokuSample {
             put("80", 7);put("81", 7);put("82", 7);put("83", 8);put("84", 8);put("85", 8);put("86", 9);put("87", 9);put("88", 9);
         }};
         /** 根据 行、列 获取宫索引 */
-        public static int getBoxIndexByRC (int r, int c) {
+        static int getBoxIndexByRC(int r, int c) {
             return RC_B_Mapper.get(String.format("%d%d", r, c));
         }
 
         /** 根据 宫索引 获取 行R 起始索引 */
-        public static int getMinRIndexByB (int b) {
+        static int getMinRIndexByB(int b) {
             switch (b) {
                 case 1 :
                     return 0;
@@ -271,7 +255,7 @@ public class SudokuSample {
         }
 
         /** 根据 宫索引 获取 列C 起始索引 */
-        public static int getMinCIndexByB (int b) {
+        static int getMinCIndexByB(int b) {
             switch (b) {
                 case 1 :
                     return 0;
@@ -296,7 +280,7 @@ public class SudokuSample {
         }
 
         /** 根据 宫索引 获取 行R 结束索引 */
-        public static int getMaxRIndexByB (int b) {
+        static int getMaxRIndexByB(int b) {
             switch (b) {
                 case 1 :
                     return 2;
@@ -321,7 +305,7 @@ public class SudokuSample {
         }
 
         /** 根据 宫索引 获取 列C 结束索引 */
-        public static int getMaxCIndexByB (int b) {
+        static int getMaxCIndexByB(int b) {
             switch (b) {
                 case 1 :
                     return 2;
@@ -345,7 +329,7 @@ public class SudokuSample {
             throw new RuntimeException(String.format("参数错误: b=[%d].", b));
         }
 
-        public static void cleanArray (int[][] a) {
+        static void cleanArray(int[][] a) {
             for (int i=0; i<9; i++) {
                 for (int j=0; j<9; j++) {
                     a[i][j] = 0;
@@ -354,7 +338,7 @@ public class SudokuSample {
         }
 
 
-        public static String array4Print(int[][] a) {
+        static String formatString(int[][] a) {
             String formatPattern = "    \n" +
                     "    +-------------------------------------+\n" +
                     "    | %d | %d | %d || %d | %d | %d || %d | %d | %d |\n" +
