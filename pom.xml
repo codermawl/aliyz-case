@@ -36,6 +36,7 @@
 		<fabric-sdk-java.version>2.2.0</fabric-sdk-java.version>
 		<fabric-gateway-java.version>2.2.0</fabric-gateway-java.version>
 		<log4j.version>2.13.3</log4j.version>
+		<commons-lang3.version>3.11</commons-lang3.version>
 	</properties>
 
 </project>
