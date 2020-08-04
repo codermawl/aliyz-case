@@ -3,7 +3,7 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<modules>
-		<module>alghome</module>
+		<module>alg-home</module>
 		<module>plugin</module>
 		<module>practice</module>
 		<module>integration</module>
@@ -33,7 +33,9 @@
 		<lombok.version>1.18.12</lombok.version>
 		<fastjson.version>1.2.71</fastjson.version>
 		<cglib.version>3.3.0</cglib.version>
-		<fabric-sdk-java.version>2.2.1</fabric-sdk-java.version>
+		<fabric-sdk-java.version>2.2.0</fabric-sdk-java.version>
+		<fabric-gateway-java.version>2.2.0</fabric-gateway-java.version>
+		<log4j.version>2.13.3</log4j.version>
 	</properties>
 
 </project>

@@ -8,11 +8,11 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * All rights Reserved, Designed By www.tusdao.com
+ * All rights Reserved, Designed By www.aliyz.com
  *
  * <p></p>
  * Created by mawl at 2020-08-03 14:26
- * Copyright: 2020 www.tusdao.com Inc. All rights reserved.
+ * Copyright: 2020 www.aliyz.com Inc. All rights reserved.
  */
 @SpringBootApplication
 @EnableScheduling

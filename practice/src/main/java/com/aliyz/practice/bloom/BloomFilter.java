@@ -6,11 +6,11 @@ import java.io.Serializable;
 import java.util.BitSet;
 
 /**
- * All rights Reserved, Designed By www.tusdao.com
+ * All rights Reserved, Designed By www.aliyz.com
  *
  * <p></p>
  * Created by mawl at 2020-07-30 15:05
- * Copyright: 2020 www.tusdao.com Inc. All rights reserved.
+ * Copyright: 2020 www.aliyz.com Inc. All rights reserved.
  */
 public class BloomFilter implements Serializable {
     private static final int STEPS_8 = 8;

@@ -36,3 +36,35 @@ practice/src/main/.DS_Store
 practice/src/main/java/.DS_Store
 practice/src/main/java/com/.DS_Store
 
+## --------------------^^integration^^------------------- ##
+integration/.idea
+integration/out
+integration/target
+
+integration/.DS_Store
+integration/src/.DS_Store
+integration/src/main/.DS_Store
+integration/src/main/java/.DS_Store
+integration/src/main/java/com/.DS_Store
+
+## --------------------^^plugin.fabric-sdk^^------------------- ##
+plugin/fabric-sdk/.idea
+plugin/fabric-sdk/out
+plugin/fabric-sdk/target
+
+plugin/fabric-sdk/.DS_Store
+plugin/fabric-sdk/src/.DS_Store
+plugin/fabric-sdk/src/main/.DS_Store
+plugin/fabric-sdk/src/main/java/.DS_Store
+plugin/fabric-sdk/src/main/java/com/.DS_Store
+
+## --------------------^^plugin.fast-tree^^------------------- ##
+plugin/fast-tree/.idea
+plugin/fast-tree/out
+plugin/fast-tree/target
+
+plugin/fast-tree/.DS_Store
+plugin/fast-tree/src/.DS_Store
+plugin/fast-tree/src/main/.DS_Store
+plugin/fast-tree/src/main/java/.DS_Store
+plugin/fast-tree/src/main/java/com/.DS_Store

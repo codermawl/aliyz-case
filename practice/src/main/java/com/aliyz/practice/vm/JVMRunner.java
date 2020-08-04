@@ -8,11 +8,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * All rights Reserved, Designed By www.tusdao.com
+ * All rights Reserved, Designed By www.aliyz.com
  *
  * <p></p>
  * Created by mawl at 2020-07-17 14:27
- * Copyright: 2020 www.tusdao.com Inc. All rights reserved.
+ * Copyright: 2020 www.aliyz.com Inc. All rights reserved.
  */
 public class JVMRunner {
 
