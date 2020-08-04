@@ -3,16 +3,16 @@
 out
 target
 
-## --------------------^^alghome^^------------------- ##
-alghome/.idea
-alghome/out
-alghome/target
+## --------------------^^alg-home^^------------------- ##
+alg-home/.idea
+alg-home/out
+alg-home/target
 
-alghome/.DS_Store
-alghome/src/.DS_Store
-alghome/src/main/.DS_Store
-alghome/src/main/java/.DS_Store
-alghome/src/main/java/com/.DS_Store
+alg-home/.DS_Store
+alg-home/src/.DS_Store
+alg-home/src/main/.DS_Store
+alg-home/src/main/java/.DS_Store
+alg-home/src/main/java/com/.DS_Store
 
 ## --------------------^^plugin^^------------------- ##
 plugin/.idea
