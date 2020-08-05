@@ -152,7 +152,7 @@ orderers:
       grpc.keepalive_timeout_ms: 180000
       grpc.keepalive_without_calls: true
     tlsCACerts:
-      path: /Users/mawl/Workspace/go/src/github.com/hyperledger/fabric-samples/test-network/organizations/ordererOrganizations/example.com/tlsca/
+      path: /Users/mawl/Workspace/go/src/github.com/hyperledger/fabric-samples/test-network/organizations/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem
 
 #
 # List of peers to send various requests to, including endorsement, query

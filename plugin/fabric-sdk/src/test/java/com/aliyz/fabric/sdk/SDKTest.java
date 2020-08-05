@@ -6,6 +6,8 @@ import org.hyperledger.fabric.sdk.security.CryptoSuite;
 import org.junit.Test;
 
 import java.io.File;
+import java.nio.file.Paths;
+import java.util.Collection;
 
 /**
  * All rights Reserved, Designed By www.aliyz.com
@@ -18,15 +20,17 @@ public class SDKTest {
 
     private static final String TEST_ORG = "Org1";
 
-    private static final String TEST_FIXTURES_PATH = "src/test/fixture";
+    private static final String CHAIN_CODE_SOURCE_PATH = "/Users/mawl/Workspace/java/code.tusdao.com/fabric/fabric-sdk-java/src/test/fixture/sdkintegration/gocc/sample1";
 
-    private static final String CHAIN_CODE_PATH = "github.com/example_cc";
+    private static final String CHAIN_CODE_METAINFO_PATH = "/Users/mawl/Workspace/java/code.tusdao.com/fabric/fabric-sdk-java/src/test/fixture/meta-infs/end2endit";
 
-    private static final String CHAIN_CODE_NAME = "cc-NetworkConfigTest-001";
+    private static final String CHAIN_CODE_PATH = "github.com";
 
-    private static final String CHAIN_CODE_VERSION = "1";
+    private static final String CHAIN_CODE_NAME = "example_cc";
 
-    private static final String FOO_CHANNEL_NAME = "mychannel";
+    private static final String CHAIN_CODE_VERSION = "1.0";
+
+    private static final String MY_CHANNEL_NAME = "mychannel";
 
     private static NetworkConfig networkConfig;
 
@@ -38,16 +42,55 @@ public class SDKTest {
         }
     }
 
+    @Test
+    public void networkTest() throws Exception {
+        System.out.println("---------------^^ 网络测试 ^^--------------");
+
+        HFClient hfClient = getTheClient();
+        Channel channel = constructChannel(hfClient, MY_CHANNEL_NAME);
+
+        System.out.println("-------------- channel -------------" + JSON.toJSONString(channel));
+    }
+
     // 部署链码测试
     @Test
-    public void deployChaincodeIfRequired() throws Exception {
+    public void installChaincodeTest() throws Exception {
         System.out.println("---------------^^ 部署链码 ^^--------------");
 
-        HFClient client = getTheClient();
-        Channel channel = constructChannel(client, FOO_CHANNEL_NAME);
+        HFClient hfClient = getTheClient();
+        Channel channel = constructChannel(hfClient, MY_CHANNEL_NAME);
 
-        Peer peer = channel.getPeers().iterator().next();
-        System.out.println("---------------^^-------------: " + JSON.toJSONString(peer));
+        LifecycleChaincodeEndorsementPolicy lccEndorsementPolicy = LifecycleChaincodeEndorsementPolicy.fromSignaturePolicyYamlFile(
+                Paths.get("/Users/mawl/Workspace/java/code.aliyz.com/aliyz-case/plugin/fabric-sdk/src/main/resources/policy-config/chaincodeendorsementpolicy.yaml"));
+
+//        lccEndorsementPolicy = null;
+
+        String responses = SDK.installChaincode0(hfClient,
+                channel,
+                "mylabel",
+                CHAIN_CODE_SOURCE_PATH,
+                CHAIN_CODE_METAINFO_PATH,
+                CHAIN_CODE_PATH,
+                CHAIN_CODE_NAME,
+                CHAIN_CODE_VERSION,
+                TransactionRequest.Type.GO_LANG,
+                new String[]{"peer0.org1.example.com"},
+                lccEndorsementPolicy);
+
+        System.out.println("-------------- responses -------------" + JSON.toJSONString(responses));
+    }
+
+    @Test
+    public void queryChaincodeTest () throws Exception {
+        System.out.println("---------------^^ 查询链码 ^^--------------");
+
+        HFClient hfClient = getTheClient();
+        Channel channel = constructChannel(hfClient, MY_CHANNEL_NAME);
+
+        String payload = SDK.chaincodeQuery(hfClient,
+                channel, CHAIN_CODE_NAME, CHAIN_CODE_VERSION, "query", new String[]{"a"});
+
+        System.out.println("-------------- payload -------------" + JSON.toJSONString(payload));
 
     }
 

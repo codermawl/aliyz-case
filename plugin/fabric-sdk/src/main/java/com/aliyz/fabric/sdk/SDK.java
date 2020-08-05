@@ -1,5 +1,6 @@
 package com.aliyz.fabric.sdk;
 
+import com.aliyz.fabric.sdk.utils.MySDKUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hyperledger.fabric.protos.peer.Query;
 import org.hyperledger.fabric.sdk.*;
@@ -145,7 +146,7 @@ public class SDK {
     /** ------------------------------------- Chain Code --------------------------------------- **/
 
     /**
-     * @Description: 安装链码
+     * @Description: 安装链码，Fabric 2.0在链码操作上有很大改动，整体的流程可以分为四个步骤：打包、安装、机构审批、链码提交。
      * @param hfClient
      * @param channel
      * @param chaincodeSourcePath 如："src/test/fixture/sdkintegration/gocc/sample1"
@@ -154,98 +155,48 @@ public class SDK {
      * @param chaincodeName 如："example_cc"
      * @param chaincodeVersion 如："1.0"
      * @param chaincodeType 链码语言类型
+     * @param selectPeerNames 需要部署链码的节点名称
      * @param lccEndorsementPolicy 链码背书策略，如果为 null，在默认情况下，合约的背书策略为 majority of channel members，过半数通道成员。
      * @return: java.util.Collection<org.hyperledger.fabric.sdk.ProposalResponse>
      * @Author: mawl
      * @Date: 2020-08-04 14:45
      **/
-    public static Collection<ProposalResponse> installChaincode(HFClient hfClient,
+    public static String installChaincode0(HFClient hfClient,
                                                                 Channel channel,
+                                                                String label,
                                                                 String chaincodeSourcePath,
                                                                 String chaincodeMetainfoPath,
                                                                 String chaincodePath,
                                                                 String chaincodeName,
                                                                 String chaincodeVersion,
                                                                 TransactionRequest.Type chaincodeType,
+                                                                String[] selectPeerNames,
                                                                 LifecycleChaincodeEndorsementPolicy lccEndorsementPolicy) {
         try {
-            Collection<Peer> peersFromOrg = channel.getPeers();
             Collection<Orderer> orderers = channel.getOrderers();
-            Collection<LifecycleInstallChaincodeProposalResponse> responses0;
-            Collection<LifecycleApproveChaincodeDefinitionForMyOrgProposalResponse> responses1;
-            Collection<ProposalResponse> successful = new LinkedList<>();
-            Collection<ProposalResponse> failed = new LinkedList<>();
 
-            if (!checkInstantiatedChaincode(channel, peersFromOrg.iterator().next(), chaincodePath, chaincodeName, chaincodeVersion)) {
+            final String channelName = channel.getName();
+            out("deployChaincode - channelName = " + channelName);
 
-                final String channelName = channel.getName();
-                out("deployChaincode - channelName = " + channelName);
+            //////////////////////////////////////
+            // 一、打包链码
+            LifecycleChaincodePackage lifecycleChaincodePackage = packageChaincode(label, chaincodeSourcePath, chaincodeMetainfoPath, chaincodePath, chaincodeName, chaincodeType);
 
-                //////////////////////////////////////
-                // 安装链码
-                out("Creating lifecycleInstallChaincodeRequest");
-                LifecycleInstallChaincodeRequest lifecycleInstallChaincodeRequest = hfClient.newLifecycleInstallChaincodeRequest();
-                LifecycleChaincodePackage lifecycleChaincodePackage = LifecycleChaincodePackage.fromSource(chaincodeName + ":" + chaincodeVersion,
-                                                                                                            Paths.get(chaincodeSourcePath),
-                                                                                                            chaincodeType,
-                                                                                                            chaincodePath + "/" + chaincodeName,
-                                                                                                            Paths.get(chaincodeMetainfoPath));
-                lifecycleInstallChaincodeRequest.setLifecycleChaincodePackage(lifecycleChaincodePackage);
-                out("Sending lifecycleInstallChaincodeRequest to all peers...");
-                int numInstallProposal = peersFromOrg.size();
-                responses0 = hfClient.sendLifecycleInstallChaincodeRequest(lifecycleInstallChaincodeRequest, peersFromOrg);
-                for (ProposalResponse response : responses0) {
-                    if (response.getStatus() == ProposalResponse.Status.SUCCESS) {
-                        out("[√]Successful install proposal response Txid: %s from peer %s", response.getTransactionID(), response.getPeer().getName());
-                        successful.add(response);
-                    } else {
-                        failed.add(response);
-                    }
-                }
-                out("Received %d install proposal responses. Successful+verified: %d . Failed: %d", numInstallProposal, successful.size(), failed.size());
-                if (failed.size() > 0) {
-                    ProposalResponse first = failed.iterator().next();
-                    out("[X] Not enough endorsers for install :" + successful.size() + ".  " + first.getMessage());
-                }
+            //////////////////////////////////////
+            // 二、安装链码
+            String packageId = installChaincode(hfClient, channel, selectPeerNames, lifecycleChaincodePackage);
 
-                if (lccEndorsementPolicy != null) {
-                    //////////////////////////////////////
-                    // 设置链码级别的背书策略
-                    LifecycleApproveChaincodeDefinitionForMyOrgRequest lifecycleApproveChaincodeRequest = hfClient.newLifecycleApproveChaincodeDefinitionForMyOrgRequest();
-                    lifecycleApproveChaincodeRequest.setChaincodeName(chaincodeName);
-                    lifecycleApproveChaincodeRequest.setChaincodeVersion(chaincodeVersion);
-                    lifecycleApproveChaincodeRequest.setChaincodeEndorsementPolicy(lccEndorsementPolicy);
-                    out("Sending lifecycleApproveChaincodeRequest to all peers...");
-                    successful.clear();
-                    failed.clear();
-                    responses1 = channel.sendLifecycleApproveChaincodeDefinitionForMyOrgProposal(lifecycleApproveChaincodeRequest, peersFromOrg);
-                    for (ProposalResponse response : responses1) {
-                        if (response.isVerified() && response.getStatus() == ProposalResponse.Status.SUCCESS) {
-                            successful.add(response);
-                            out("[√] Succesful instantiate proposal response Txid: %s from peer %s", response.getTransactionID(), response.getPeer().getName());
-                        } else {
-                            failed.add(response);
-                        }
-                    }
-                    out("Received %d instantiate proposal responses. Successful+verified: %d . Failed: %d", responses1.size(), successful.size(), failed.size());
-                    if (failed.size() > 0) {
-                        ProposalResponse first = failed.iterator().next();
-                        out("[X] Not enough endorsers for instantiate :" + successful.size() + "endorser failed with " + first.getMessage() + ". Was verified:" + first.isVerified());
-                    }
-                }
+            //////////////////////////////////////
+            // 三、审核链码
+            approveForMyOrg(hfClient, channel, selectPeerNames, packageId, chaincodeName, chaincodeVersion, lccEndorsementPolicy);
+            checkCommitReadiness(hfClient, channel, label, selectPeerNames[0]);
 
-                ///////////////
-                /// Send instantiate transaction to orderer
-                out("Sending instantiateTransaction to orderer...");
-                CompletableFuture<BlockEvent.TransactionEvent> future = channel.sendTransaction(successful, orderers);
+            //////////////////////////////////////
+            // 四、提交链码
+            String ok = commitChaincodeDefinition(hfClient, channel, selectPeerNames, chaincodeName, chaincodeVersion, lccEndorsementPolicy);
 
-                out("calling get...");
-                BlockEvent.TransactionEvent event = future.get(30, TimeUnit.SECONDS);
-                out("get done...");
+            return ok;
 
-                out("Finished instantiate transaction with transaction id %s, %s", event.getTransactionID(), event.isValid());
-                return successful;
-            }
         } catch (InvalidArgumentException e1) {
             out("Caught an InvalidArgumentException running channel %s", channel.getName());
             e1.printStackTrace();
@@ -263,48 +214,266 @@ public class SDK {
         return null;
     }
 
-    /**
-     * @Description: 检查当前通道是否已经安装过链码
-     * @param channel
-     * @param peer
-     * @param ccPath
-     * @param ccName
-     * @param ccVersion
-     * @return: boolean
-     * @Author: mawl
-     * @Date: 2020-08-04 15:57
-     **/
-    private static boolean checkInstantiatedChaincode(Channel channel, Peer peer, String ccPath, String ccName, String ccVersion) throws InvalidArgumentException, ProposalException {
-        out("Checking instantiated chaincode: %s, at version: %s, on peer: %s", ccName, ccVersion, peer.getName());
+    // 链码打包
+    // peer lifecycle chaincode package mycc.tar.gz \
+    // --path github.com/hyperledger/fabric-samples/chaincode/abstore/go/ \
+    // --lang golang \
+    // --label mycc_1
+    public static LifecycleChaincodePackage packageChaincode ( String label,
+                                                               String chaincodeSourcePath,
+                                                               String chaincodeMetainfoPath,
+                                                               String chaincodePath,
+                                                               String chaincodeName,
+                                                               TransactionRequest.Type chaincodeType) throws IOException, InvalidArgumentException {
 
-        boolean found = false;
+        String ccPath = chaincodePath + "/" + chaincodeName;
 
-        List<Query.ChaincodeInfo> ccinfoList = channel.queryInstantiatedChaincodes(peer);
-        for (Query.ChaincodeInfo ccifo : ccinfoList) {
-            found = ccName.equals(ccifo.getName()) && ccPath.equals(ccifo.getPath()) && ccVersion.equals(ccifo.getVersion());
-            if (found) {
-                break;
-            }
-        }
-
-        return found;
+        return LifecycleChaincodePackage.fromSource(label,
+                Paths.get(chaincodeSourcePath),
+                chaincodeType,
+                ccPath,
+                Paths.get(chaincodeMetainfoPath));
     }
 
-    /** ------------------------------------- Invoke Chain Code --------------------------------------- **/
+    // 链码安装
+    // peer lifecycle chaincode install mycc.tar.gz
+    public static String installChaincode (HFClient hfClient,
+                                         Channel channel,
+                                         String[] selectPeerNames,
+                                         LifecycleChaincodePackage lifecycleChaincodePackage) throws ProposalException, InvalidArgumentException {
 
-    /**
-     * @Description: 图表数据支持
-     * @param client
-     * @param channel
-     * @param chaincodeName
-     * @param chaincodeVersion
-     * @param fcn
-     * @param args
-     * @return: java.lang.String
-     * @Author: mawl
-     * @Date: 2020-08-04 18:39
-     **/
-    private static String queryChaincode (HFClient client,
+        Collection<Peer> peersFromOrg = MySDKUtils.extractPeersFromChannel(channel, selectPeerNames);
+
+        Collection<LifecycleInstallChaincodeProposalResponse> responses;
+        Collection<ProposalResponse> successful = new LinkedList<>();
+        Collection<ProposalResponse> failed = new LinkedList<>();
+
+        out("Creating lifecycleInstallChaincodeRequest");
+        LifecycleInstallChaincodeRequest lifecycleInstallChaincodeRequest = hfClient.newLifecycleInstallChaincodeRequest();
+        lifecycleInstallChaincodeRequest.setLifecycleChaincodePackage(lifecycleChaincodePackage);
+        lifecycleInstallChaincodeRequest.setProposalWaitTime(10 * 60 * 1000); // 等待10min
+        out("Sending lifecycleInstallChaincodeRequest to selected peers...");
+        int numInstallProposal = peersFromOrg.size();
+        responses = hfClient.sendLifecycleInstallChaincodeRequest(lifecycleInstallChaincodeRequest, peersFromOrg);
+        for (ProposalResponse response : responses) {
+            if (response.getStatus() == ProposalResponse.Status.SUCCESS) {
+                out("[√]Successful InstallChaincode proposal response Txid: %s from peer %s", response.getTransactionID(), response.getPeer().getName());
+                successful.add(response);
+            } else {
+                failed.add(response);
+            }
+        }
+        out("Received %d InstallChaincode proposal responses. Successful+verified: %d . Failed: %d", numInstallProposal, successful.size(), failed.size());
+        if (failed.size() > 0) {
+            ProposalResponse first = failed.iterator().next();
+            out("[X] Not enough endorsers for install : %d. %s", successful.size(), first.getMessage());
+        }
+
+        return ((LifecycleInstallChaincodeProposalResponse) successful.iterator().next()).getPackageId();
+    }
+
+    // TODO 查询链码安装结果
+    // peer lifecycle chaincode queryinstalled
+    private static Query.ChaincodeInfo queryInstalled (HFClient hfClient,
+                                       Channel channel,
+                                       String chaincodePath,
+                                       String chaincodeName,
+                                       String chaincodeVersion,
+                                       String selectPeerName) throws InvalidArgumentException, ProposalException {
+
+//        LifecycleQueryInstalledChaincodeRequest lifecycleQueryInstalledChaincodeRequest = hfClient.newLifecycleQueryInstalledChaincodeRequest();
+//        lifecycleQueryInstalledChaincodeRequest.setPackageID();
+
+        Collection<Peer> peers = MySDKUtils.extractPeersFromChannel(channel, new String[]{selectPeerName});
+
+        List<Query.ChaincodeInfo> ccinfoList = channel.queryInstantiatedChaincodes(peers.iterator().next());
+        boolean found;
+        for (Query.ChaincodeInfo ccifo : ccinfoList) {
+            found = chaincodePath.equals(ccifo.getPath()) && chaincodeName.equals(ccifo.getName()) && chaincodeVersion.equals(ccifo.getVersion());
+            if (found) {
+                return ccifo;
+            }
+        }
+        return null;
+    }
+
+    // 审批链码
+    // peer lifecycle chaincode approveformyorg \
+    // --tls true \
+    // --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
+    // --channelID mychannel \
+    // --name mycc \
+    // --version 1 \
+    // --init-required \
+    // --package-id mycc_1:f5cc6d6e871262e8da9788f3d463442e51c482ec8288c13e4545741ad45d86fa \
+    // --sequence 1 \
+    // --waitForEvent
+    public static void approveForMyOrg (HFClient hfClient,
+                                        Channel channel,
+                                        String[] selectPeerNames,
+                                        String packageId,
+                                        String chaincodeName,
+                                        String chaincodeVersion,
+                                        LifecycleChaincodeEndorsementPolicy lccEndorsementPolicy) throws ProposalException, InvalidArgumentException {
+
+        Collection<Peer> peersFromOrg = MySDKUtils.extractPeersFromChannel(channel, selectPeerNames);
+
+        Collection<LifecycleApproveChaincodeDefinitionForMyOrgProposalResponse> responses;
+        Collection<ProposalResponse> successful = new LinkedList<>();
+        Collection<ProposalResponse> failed = new LinkedList<>();
+
+        LifecycleApproveChaincodeDefinitionForMyOrgRequest lifecycleApproveChaincodeRequest = hfClient.newLifecycleApproveChaincodeDefinitionForMyOrgRequest();
+        lifecycleApproveChaincodeRequest.setPackageId(packageId);
+        lifecycleApproveChaincodeRequest.setChaincodeName(chaincodeName);
+        lifecycleApproveChaincodeRequest.setChaincodeVersion(chaincodeVersion);
+        lifecycleApproveChaincodeRequest.setSequence(1L); // TODO ... ???
+        if (lccEndorsementPolicy != null) {
+            lifecycleApproveChaincodeRequest.setChaincodeEndorsementPolicy(lccEndorsementPolicy);
+        }
+        out("Sending lifecycleApproveChaincodeRequest to selected peers...");
+        responses = channel.sendLifecycleApproveChaincodeDefinitionForMyOrgProposal(lifecycleApproveChaincodeRequest, peersFromOrg);
+        for (ProposalResponse response : responses) {
+            if (response.isVerified() && response.getStatus() == ProposalResponse.Status.SUCCESS) {
+                successful.add(response);
+                out("[√] Succesful ApproveChaincode proposal response Txid: %s from peer %s", response.getTransactionID(), response.getPeer().getName());
+            } else {
+                failed.add(response);
+            }
+        }
+        out("Received %d ApproveChaincode proposal responses. Successful+verified: %d . Failed: %d", responses.size(), successful.size(), failed.size());
+        if (failed.size() > 0) {
+            ProposalResponse first = failed.iterator().next();
+            out("[X] Not enough endorsers for ApproveChaincode : %d endorser failed with %s. Was verified: %s", successful.size(), first.getMessage(), first.isVerified());
+        }
+
+        LifecycleApproveChaincodeDefinitionForMyOrgProposalResponse r1 = responses.iterator().next();
+
+//        return successful;
+    }
+
+    // TODO 查看链码的审批状态
+    // peer lifecycle chaincode checkcommitreadiness \
+    // --channelID mychannel \
+    // --name mycc \
+    // --version 1 \
+    // --sequence 1 \
+    // --output json \
+    // --init-required
+    private static void checkCommitReadiness (HFClient hfClient,
+                                             Channel channel,
+                                             String chaincodeName,
+                                             String selectPeerName) throws InvalidArgumentException, ProposalException {
+
+        Collection<Peer> peersFromOrg = MySDKUtils.extractPeersFromChannel(channel, new String[]{selectPeerName});
+
+//        LifecycleCheckCommitReadinessRequest lifecycleCheckCommitReadinessRequest = new LifecycleCheckCommitReadinessRequest(hfClient.getUserContext());
+//        Collection<LifecycleCheckCommitReadinessProposalResponse> responses1 = channel.sendLifecycleCheckCommitReadinessRequest();
+
+        QueryLifecycleQueryChaincodeDefinitionRequest lifecycleQueryChaincodeDefinitionRequest = hfClient.newQueryLifecycleQueryChaincodeDefinitionRequest();
+        lifecycleQueryChaincodeDefinitionRequest.setChaincodeName(chaincodeName);
+        Collection<LifecycleQueryChaincodeDefinitionProposalResponse> responses = channel.lifecycleQueryChaincodeDefinition(lifecycleQueryChaincodeDefinitionRequest, peersFromOrg);
+
+        LifecycleQueryChaincodeDefinitionProposalResponse response = responses.iterator().next();
+        System.out.println("+++++++++" + response);
+
+    }
+
+    // 提交链码
+    // peer lifecycle chaincode commit \
+    // -o orderer.example.com:7050 \
+    // --tls true \
+    // --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
+    // --channelID mychannel \
+    // --name mycc \
+    // --peerAddresses peer0.org1.example.com:7051 \
+    // --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
+    // --peerAddresses peer0.org2.example.com:9051 \
+    // --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
+    // --version 1 \
+    // --sequence 1 \
+    // --init-required
+    public static String commitChaincodeDefinition (HFClient hfClient,
+                                                  Channel channel,
+                                                  String[] selectPeerNames,
+                                                  String chaincodeName,
+                                                  String chaincodeVersion,
+                                                  LifecycleChaincodeEndorsementPolicy lccEndorsementPolicy) throws ProposalException, InvalidArgumentException {
+
+        Collection<Peer> peersFromOrg = MySDKUtils.extractPeersFromChannel(channel, selectPeerNames);
+
+        Collection<LifecycleCommitChaincodeDefinitionProposalResponse> responses;
+        Collection<ProposalResponse> successful = new LinkedList<>();
+        Collection<ProposalResponse> failed = new LinkedList<>();
+
+        LifecycleCommitChaincodeDefinitionRequest lifecycleCommitChaincodeDefinitionRequest = hfClient.newLifecycleCommitChaincodeDefinitionRequest();
+        lifecycleCommitChaincodeDefinitionRequest.setChaincodeName(chaincodeName);
+        lifecycleCommitChaincodeDefinitionRequest.setChaincodeVersion(chaincodeVersion);
+        lifecycleCommitChaincodeDefinitionRequest.setSequence(1L);
+        if (lccEndorsementPolicy != null) {
+            lifecycleCommitChaincodeDefinitionRequest.setChaincodeEndorsementPolicy(lccEndorsementPolicy);
+        }
+        out("Sending lifecycleApproveChaincodeRequest to selected peers...");
+        responses = channel.sendLifecycleCommitChaincodeDefinitionProposal(lifecycleCommitChaincodeDefinitionRequest, peersFromOrg);
+        for (ProposalResponse response : responses) {
+            if (response.isVerified() && response.getStatus() == ProposalResponse.Status.SUCCESS) {
+                successful.add(response);
+                out("[√] Succesful CommitChaincode proposal response Txid: %s from peer %s", response.getTransactionID(), response.getPeer().getName());
+            } else {
+                failed.add(response);
+            }
+        }
+        out("Received %d CommitChaincode proposal responses. Successful+verified: %d . Failed: %d", responses.size(), successful.size(), failed.size());
+        if (failed.size() > 0) {
+            ProposalResponse first = failed.iterator().next();
+            out("[X] Not enough endorsers for CommitChaincode : %d endorser failed with %s. Was verified: %s", successful.size(), first.getMessage(), first.isVerified());
+        }
+
+        ///////////////
+        /// Send instantiate transaction to orderer
+        out("Sending instantiateTransaction to orderer...");
+        CompletableFuture<BlockEvent.TransactionEvent> future = channel.sendTransaction(successful, channel.getOrderers());
+
+        BlockEvent.TransactionEvent event = null;
+        try {
+            out("calling get...");
+            event = future.get(30, TimeUnit.SECONDS);
+            out("get done...");
+            out("Finished CommitChaincode transaction with transaction id %s, %s", event.getTransactionID(), event.isValid());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return "OK";
+    }
+
+    // 查看链码的提交状态
+    // peer lifecycle chaincode querycommitted --channelID mychannel --name mycc
+    private static void queryCommitted (HFClient hfClient,
+                                       Channel channel,
+                                       String chaincodeName) {
+
+        // TODO ...
+    }
+
+    // 调用链码的Init方法
+    // peer chaincode invoke -o orderer.example.com:7050 \
+    // --tls true \
+    // --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
+    // -C mychannel \
+    // -n mycc \
+    // --peerAddresses peer0.org1.example.com:7051
+    // --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
+    // --peerAddresses peer0.org2.example.com:9051 \
+    // --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
+    // --isInit \
+    // -c '{"Args":["Init","a","100","b","100"]}'
+    public static void chaincodeInvokeInit () {
+
+    }
+
+    // 链码查询
+    // peer chaincode query -C mychannel -n mycc -c '{"Args":["query","a"]}'
+    public static String chaincodeQuery (HFClient hfClient,
                                             Channel channel,
                                             String chaincodeName,
                                             String chaincodeVersion,
@@ -315,7 +484,7 @@ public class SDK {
 
         String expect = null;
         try {
-            QueryByChaincodeRequest queryByChaincodeRequest = client.newQueryProposalRequest();
+            QueryByChaincodeRequest queryByChaincodeRequest = hfClient.newQueryProposalRequest();
             queryByChaincodeRequest.setArgs(args);
             queryByChaincodeRequest.setFcn(fcn);
             queryByChaincodeRequest.setChaincodeName(chaincodeName);
@@ -350,20 +519,18 @@ public class SDK {
         return expect;
     }
 
-    /**
-     * @Description: 图表数据支持
-     * @param client
-     * @param channel
-     * @param chaincodeName
-     * @param chaincodeVersion
-     * @param fcn
-     * @param args
-     * @param user
-     * @return: java.util.concurrent.CompletableFuture<org.hyperledger.fabric.sdk.BlockEvent.TransactionEvent>
-     * @Author: mawl
-     * @Date: 2020-08-04 19:00
-     **/
-    private static CompletableFuture<BlockEvent.TransactionEvent> invokeChaincode (HFClient client,
+    // 链码调用
+    // peer chaincode invoke -o orderer.example.com:7050 \
+    // --tls true \
+    // --cafile /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem \
+    // -C mychannel \
+    // -n mycc \
+    // --peerAddresses peer0.org1.example.com:7051 \
+    // --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt \
+    // --peerAddresses peer0.org2.example.com:9051 \
+    // --tlsRootCertFiles /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt \
+    // -c '{"Args":["invoke","a","b","10"]}'
+    private static CompletableFuture<BlockEvent.TransactionEvent> chaincodeInvoke (HFClient hfClient,
                                                                                    Channel channel,
                                                                                    String chaincodeName,
                                                                                    String chaincodeVersion,
@@ -375,7 +542,7 @@ public class SDK {
         try {
             ///////////////
             /// Send transaction proposal to all peers
-            TransactionProposalRequest transactionProposalRequest = client.newTransactionProposalRequest();
+            TransactionProposalRequest transactionProposalRequest = hfClient.newTransactionProposalRequest();
             transactionProposalRequest.setChaincodeName(chaincodeName);
             transactionProposalRequest.setChaincodeVersion(chaincodeVersion);
             transactionProposalRequest.setFcn(fcn);
