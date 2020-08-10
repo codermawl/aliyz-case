@@ -30,7 +30,7 @@ import static java.lang.String.format;
  * Create by mawl at 2020-08-04 10:57
  * Copyright: 2020 www.aliyz.com Inc. All rights reserved.
  */
-public abstract class SdkExecuter {
+public abstract class ISdk {
 
     protected static void out(String format, Object... args) {
 

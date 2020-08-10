@@ -23,7 +23,7 @@ import static java.lang.String.format;
  * Created by mawl at 2020-08-07 15:13
  * Copyright: 2020 www.tusdao.com Inc. All rights reserved.
  */
-public class ChaincodeExecuter extends SdkExecuter {
+public class CCSDK extends ISdk {
 
     /**
      * @Description:  链码打包
@@ -240,7 +240,7 @@ public class ChaincodeExecuter extends SdkExecuter {
         }
     }
 
-    // TODO 查看链码的审批状态
+    // 查看链码的审批状态
     // peer lifecycle chaincode checkcommitreadiness \
     // --channelID mychannel \
     // --name mycc \

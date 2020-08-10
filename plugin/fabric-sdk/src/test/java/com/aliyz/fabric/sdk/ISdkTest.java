@@ -2,6 +2,7 @@ package com.aliyz.fabric.sdk;
 
 import com.alibaba.fastjson.JSON;
 import com.aliyz.fabric.sdk.exception.HFSDKException;
+import com.aliyz.fabric.sdk.model.SampleOrg;
 import com.aliyz.fabric.sdk.utils.HFSDKUtils;
 import org.hyperledger.fabric.sdk.*;
 import org.hyperledger.fabric.sdk.security.CryptoSuite;
@@ -9,10 +10,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -22,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  * Created by mawl at 2020-08-04 10:11
  * Copyright: 2020 www.aliyz.com Inc. All rights reserved.
  */
-public class SdkExecuterTest {
+public class ISdkTest {
 
     private static final String ORG_1 = "Org1";
     private static final String ORG_2 = "Org2";
@@ -31,21 +29,17 @@ public class SdkExecuterTest {
     private static final String PEER_0_ORG_1 = "peer0.org1.example.com";
     private static final String PEER_1_ORG_1 = "peer1.org1.example.com";
     private static final String PEER_0_ORG_2 = "peer0.org2.example.com";
+    private static final String ORDERER = "orderer.example.com";
 
 
 
     private static final String CHAIN_CODE_SOURCE_PATH = "/Users/mawl/Workspace/java/code.tusdao.com/fabric/fabric-sdk-java/src/test/fixture/sdkintegration/gocc/sample1";
-
     private static final String CHAIN_CODE_METAINFO_PATH = "/Users/mawl/Workspace/java/code.tusdao.com/fabric/fabric-sdk-java/src/test/fixture/meta-infs/end2endit";
-
+    private static final String CHANNEL_TX_SOURCE_PATH = "/Users/mawl/Workspace/deploy/fabric/channel-artifacts";
     private static final String CHAIN_CODE_PATH = "github.com";
-
     private static final String CHAIN_CODE_NAME = "example_cc";
-
     private static final String CHAIN_CODE_VERSION = "1.0";
-
     private static final String MY_CHANNEL_NAME = "mychannel";
-
     private static NetworkConfig networkConfig;
     private static HFClient org1Client;
 
@@ -57,6 +51,35 @@ public class SdkExecuterTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void constructChannelTest () {
+        System.out.println("---------------^^ 创建通道 ^^--------------");
+
+        String channelName = MY_CHANNEL_NAME;
+        SampleOrg org1 = null;
+        Collection<Peer> orgPeers = new ArrayList<>();
+        Collection<Orderer> orderers = new ArrayList<>();
+        boolean createFabricChannel = true;
+        String channelTxPath = CHANNEL_TX_SOURCE_PATH;
+
+        try {
+            Peer peer = org1Client.newPeer(PEER_0_ORG_1, networkConfig.getPeerUrl(PEER_0_ORG_1), networkConfig.getPeerProperties(PEER_0_ORG_1));
+            orgPeers.add(peer);
+
+            Orderer orderer = org1Client.newOrderer(ORDERER, "grpcs://localhost:7050", networkConfig.getOrdererProperties(ORDERER));
+            orderers.add(orderer);
+
+            Channel channel = CHSDK.constructChannel(org1Client, MY_CHANNEL_NAME, org1, orgPeers, orderers, createFabricChannel, channelTxPath);
+
+            System.out.println("/////////////////channel/////////////////" + channel.getName());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("##---------------^^ 结束 ^^--------------##");
+
     }
 
     // 部署链码测试
@@ -95,43 +118,43 @@ public class SdkExecuterTest {
 
             //////////////////////////////////////
             // 一、打包链码
-            LifecycleChaincodePackage lifecycleChaincodePackage = ChaincodeExecuter.packageChaincode(chaincodeLabel, chaincodeSourcePath,
+            LifecycleChaincodePackage lifecycleChaincodePackage = CCSDK.packageChaincode(chaincodeLabel, chaincodeSourcePath,
                     chaincodeMetainfoPath, chaincodePath, chaincodeName, chaincodeType);
             System.out.println("////////////////// cc package ///////////////" + lifecycleChaincodePackage.getLabel());
 
             //////////////////////////////////////
             // 二、安装链码
-            String packageId = ChaincodeExecuter.installChaincode(org1Client, channel, org1Peers, lifecycleChaincodePackage);
+            String packageId = CCSDK.installChaincode(org1Client, channel, org1Peers, lifecycleChaincodePackage);
             System.out.println("////////////////// cc packageId ///////////////" + packageId);
 
-            boolean checkInstall = ChaincodeExecuter.queryInstalled(org1Client, org1Peers, packageId, chaincodeLabel);
+            boolean checkInstall = CCSDK.queryInstalled(org1Client, org1Peers, packageId, chaincodeLabel);
             System.out.println("////////////////// check installed cc ///////////////" + checkInstall);
 
             //////////////////////////////////////
             // 三、审核链码
-            BlockEvent.TransactionEvent approveEvents = ChaincodeExecuter.approveForMyOrg(org1Client, channel, org1Peers, sequence, chaincodeName,
+            BlockEvent.TransactionEvent approveEvents = CCSDK.approveForMyOrg(org1Client, channel, org1Peers, sequence, chaincodeName,
                     chaincodeVersion, lccEndorsementPolicy, ccCollectionConfiguration, initRequired, packageId)
                     .get(60, TimeUnit.SECONDS);
             System.out.println("////////////////// approve cc result ///////////////" + approveEvents.isValid());
 
-            boolean checkResult = ChaincodeExecuter.checkCommitReadiness(org1Client, channel, sequence, chaincodeName, chaincodeLabel, lccEndorsementPolicy,
+            boolean checkResult = CCSDK.checkCommitReadiness(org1Client, channel, sequence, chaincodeName, chaincodeLabel, lccEndorsementPolicy,
                     ccCollectionConfiguration, initRequired, org1Peers, new HashSet<>(Arrays.asList(ORG_1_MSP)),
                     Collections.emptySet());
             System.out.println("////////////////// check approve result ///////////////" + checkResult);
 
             //////////////////////////////////////
             // 四、提交链码
-            BlockEvent.TransactionEvent commitEvent = ChaincodeExecuter.commitChaincodeDefinition(org1Client, channel, sequence, chaincodeName,
+            BlockEvent.TransactionEvent commitEvent = CCSDK.commitChaincodeDefinition(org1Client, channel, sequence, chaincodeName,
                     chaincodeVersion, lccEndorsementPolicy, ccCollectionConfiguration, initRequired, org1Peers)
                     .get(60, TimeUnit.SECONDS);
             System.out.println("////////////////// commit cc result ///////////////" + commitEvent.isValid());
-            checkResult = ChaincodeExecuter.queryCommitted(org1Client, channel, chaincodeName, org1Peers, sequence, initRequired, null,
+            checkResult = CCSDK.queryCommitted(org1Client, channel, chaincodeName, org1Peers, sequence, initRequired, null,
                     ccCollectionConfiguration);
             System.out.println("////////////////// check commit result ///////////////" + checkResult);
 
             //////////////////////////////////////
             // 五、初始化链码
-            BlockEvent.TransactionEvent initEvent = ChaincodeExecuter.initChaincode(org1Client, org1Client.getUserContext(), channel, initRequired, chaincodeName,
+            BlockEvent.TransactionEvent initEvent = CCSDK.initChaincode(org1Client, org1Client.getUserContext(), channel, initRequired, chaincodeName,
                     chaincodeVersion, chaincodeType, new String[]{"a,", "100", "b", "300"})
                     .get(60, TimeUnit.SECONDS);
             System.out.println("////////////////// init cc result ///////////////" + initEvent.isValid());
@@ -151,7 +174,7 @@ public class SdkExecuterTest {
 
             Channel channel = constructChannel(org1Client, MY_CHANNEL_NAME);
 
-            String payload = ChaincodeExecuter.queryChaincode(org1Client, org1Client.getUserContext(), channel, "move", CHAIN_CODE_NAME, CHAIN_CODE_VERSION,
+            String payload = CCSDK.queryChaincode(org1Client, org1Client.getUserContext(), channel, "move", CHAIN_CODE_NAME, CHAIN_CODE_VERSION,
                     new String[]{"a", "b", "10"});
 
             System.out.println("-------------- payload -------------" + JSON.toJSONString(payload));
@@ -159,6 +182,16 @@ public class SdkExecuterTest {
             e.printStackTrace();
         }
     }
+
+    @Test
+    public void toolTest () {
+        String path = Paths.get(CHANNEL_TX_SOURCE_PATH, MY_CHANNEL_NAME.concat(".tx")).toString();
+        System.out.println(path);
+    }
+
+
+
+
 
     /** ------------------------------------------ private method ---------------------------------------- **/
     // Returns a new client instance

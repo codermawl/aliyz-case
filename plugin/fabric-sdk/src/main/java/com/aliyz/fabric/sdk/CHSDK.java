@@ -9,6 +9,7 @@ import org.hyperledger.fabric.sdk.exception.ProposalException;
 import org.hyperledger.fabric.sdk.exception.TransactionException;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static org.hyperledger.fabric.sdk.Channel.PeerOptions.createPeerOptions;
@@ -20,7 +21,7 @@ import static org.hyperledger.fabric.sdk.Channel.PeerOptions.createPeerOptions;
  * Created by mawl at 2020-08-07 15:12
  * Copyright: 2020 www.tusdao.com Inc. All rights reserved.
  */
-public class ChannelExecuter extends SdkExecuter {
+public class CHSDK extends ISdk {
 
     private static final String CHANNEL_TX_FILE_SUFFIX = ".tx";
 
@@ -42,7 +43,7 @@ public class ChannelExecuter extends SdkExecuter {
      * @param orgPeers
      * @param orderers
      * @param createFabricChannel
-     * @param channelTxPath
+     * @param channelTxPath 如：./channel-artifacts
      * @return:
      * @Author: mawl
      * @Date: 2020-08-04 11:21
@@ -67,7 +68,7 @@ public class ChannelExecuter extends SdkExecuter {
 
             Channel newChannel = null;
             if (createFabricChannel) {
-                ChannelConfiguration channelConfiguration = new ChannelConfiguration(new File(channelTxPath));
+                ChannelConfiguration channelConfiguration = new ChannelConfiguration(new File(Paths.get(channelTxPath, channelName.concat(".tx")).toString()));
                 newChannel = client.newChannel(channelName, anOrderer, channelConfiguration, client.getChannelConfigurationSignature(channelConfiguration, peerAdmin));
             } else {
                 newChannel = client.newChannel(channelName).addOrderer(anOrderer);
