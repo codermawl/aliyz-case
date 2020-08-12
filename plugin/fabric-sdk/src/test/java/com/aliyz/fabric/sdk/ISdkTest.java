@@ -4,12 +4,22 @@ import com.alibaba.fastjson.JSON;
 import com.aliyz.fabric.sdk.exception.HFSDKException;
 import com.aliyz.fabric.sdk.model.SampleOrg;
 import com.aliyz.fabric.sdk.utils.HFSDKUtils;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.hyperledger.fabric.gateway.Wallet;
 import org.hyperledger.fabric.sdk.*;
 import org.hyperledger.fabric.sdk.security.CryptoSuite;
+import org.hyperledger.fabric.sdk.security.CryptoSuiteFactory;
+import org.hyperledger.fabric_ca.sdk.HFCAClient;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.nio.file.Paths;
+import java.security.PrivateKey;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -45,9 +55,9 @@ public class ISdkTest {
 
     static {
         try {
-            networkConfig = NetworkConfig.fromYamlFile(new File("src/main/resources/network-config/fabric-aliyz.local-network_config.yaml"));
-
-            org1Client = getTheClient(ORG_1);
+//            networkConfig = NetworkConfig.fromYamlFile(new File("src/main/resources/network-config/fabric-aliyz.local-network_config.yaml"));
+//
+//            org1Client = getTheClient(ORG_1);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -99,7 +109,6 @@ public class ISdkTest {
         boolean initRequired = true;
 
         try {
-
 
             Channel channel = constructChannel(org1Client, MY_CHANNEL_NAME);
             System.out.println("deployChaincode - channelName = " + channel.getName());
@@ -190,7 +199,49 @@ public class ISdkTest {
     }
 
 
+    @Test
+    public void registerTest () {
+        System.out.println("---------------^^ 用户登记 ^^--------------");
 
+        try {
+
+            Properties props = new Properties();
+            props.put("pemFile",
+                    "/Users/mawl/Workspace/deploy/fabric/organizations/fabric-ca/org/tls-cert.pem");
+            props.put("allowAllHostNames", "true");
+
+            HFCAClient client = HFCAClient.createNewInstance("https://localhost:7054", props);
+            CryptoSuite cryptoSuite = CryptoSuiteFactory.getDefault().getCryptoSuite();
+            client.setCryptoSuite(cryptoSuite);
+
+            String secret = CASDK.register(client, "", "admin", "adminpw", "aliyz", "aliyzpw", null);
+            System.out.println("-------------- enrollSecret -------------" + secret);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void enrollTest () {
+        System.out.println("---------------^^ 用户注册 ^^--------------");
+
+        try {
+            Properties props = new Properties();
+            props.put("pemFile",
+                    "/Users/mawl/Workspace/deploy/fabric/organizations/fabric-ca/org/tls-cert.pem");
+            props.put("allowAllHostNames", "true");
+
+            HFCAClient client = HFCAClient.createNewInstance("https://localhost:7054", props);
+            CryptoSuite cryptoSuite = CryptoSuiteFactory.getDefault().getCryptoSuite();
+            client.setCryptoSuite(cryptoSuite);
+
+            Enrollment enrollment = CASDK.enroll(client, "aliyz", "aliyzpw");
+            System.out.println("-------------- enrollment -------------" + enrollment);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 
     /** ------------------------------------------ private method ---------------------------------------- **/
@@ -215,4 +266,21 @@ public class ISdkTest {
 
         return newChannel.initialize();
     }
+
+    private static PrivateKey getPrivateKeyFromString(String data) {
+        try {
+            final Reader pemReader = new StringReader(data);
+
+            final PrivateKeyInfo pemPair;
+            try (PEMParser pemParser = new PEMParser(pemReader)) {
+                pemPair = (PrivateKeyInfo) pemParser.readObject();
+            }
+
+            return new JcaPEMKeyConverter().getPrivateKey(pemPair);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }
