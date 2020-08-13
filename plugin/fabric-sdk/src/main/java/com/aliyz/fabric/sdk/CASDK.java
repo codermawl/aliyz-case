@@ -4,14 +4,10 @@ import com.aliyz.fabric.sdk.exception.HFSCADKException;
 import com.aliyz.fabric.sdk.utils.EmptyUtils;
 import org.hyperledger.fabric.sdk.Enrollment;
 import org.hyperledger.fabric.sdk.User;
-import org.hyperledger.fabric_ca.sdk.Attribute;
-import org.hyperledger.fabric_ca.sdk.EnrollmentRequest;
-import org.hyperledger.fabric_ca.sdk.HFCAClient;
-import org.hyperledger.fabric_ca.sdk.RegistrationRequest;
-import org.hyperledger.fabric_ca.sdk.exception.EnrollmentException;
-import org.hyperledger.fabric_ca.sdk.exception.InvalidArgumentException;
-import org.hyperledger.fabric_ca.sdk.exception.RegistrationException;
+import org.hyperledger.fabric_ca.sdk.*;
+import org.hyperledger.fabric_ca.sdk.exception.*;
 
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -30,11 +26,11 @@ import java.util.Set;
 public class CASDK extends ISdk {
 
     /**
-     * @Description: 用户登记
+     * @Description: 用户注册
      * @param client
      * @param affiliation 所属机构
-     * @param orgAdmin 结构管理员ID
-     * @param orgAdminpw 结构管理员密码
+     * @param admin 结构管理员ID
+     * @param adminpw 结构管理员密码
      * @param enrollId 待登记的用户ID
      * @param enrollSecret 自定义用户密码
      * @param attrs 用户自定义的一些属性信息
@@ -43,70 +39,25 @@ public class CASDK extends ISdk {
      * @Date: 2020-08-12 18:00
      **/
     public static String register (HFCAClient client,
+                                   String admin,
+                                   String adminpw,
                                    String affiliation,
-                                   String orgAdmin,
-                                   String orgAdminpw,
                                    String enrollId,
                                    String enrollSecret,
-                                   Attribute ... attrs) throws HFSCADKException {
+                                   Collection<Attribute> attrs) throws HFSCADKException {
 
-        if (EmptyUtils.isBlack(orgAdmin) || EmptyUtils.isBlack(orgAdminpw)) {
+        if (EmptyUtils.isBlack(admin) || EmptyUtils.isBlack(adminpw)) {
             throw new HFSCADKException("管理员信息为空，将不能访问到CA");
         }
 
         try {
-            Enrollment adminEnrollment = client.enroll(orgAdmin, orgAdminpw);
-            return register(client, affiliation, adminEnrollment, enrollId, enrollSecret, attrs);
-        } catch (InvalidArgumentException e) {
-            throw new HFSCADKException("InvalidArgumentException", e);
-        } catch (Exception e) {
-            throw new HFSCADKException(e);
-        }
-    }
-    public static String register (HFCAClient client,
-            String affiliation,
-            Enrollment adminEnrollment,
-            String enrollId,
-            String enrollSecret,
-            Attribute ... attrs) throws HFSCADKException {
+            Enrollment adminEnrollment = client.enroll(admin, adminpw);
 
-        if (EmptyUtils.isBlack(enrollId)) {
-            throw new HFSCADKException("'enrollId' 不能为空");
-        }
-
-        if (adminEnrollment == null) {
-            throw new HFSCADKException("管理员信息为空，将不能访问到CA");
-        }
-
-        try {
-            // register的时候在registrationRequest中增加自定义属性
-            RegistrationRequest registrationRequest = new RegistrationRequest(enrollId); // setEnrollmentID
-
-            if (!EmptyUtils.isBlack(affiliation)) {
-                registrationRequest.setAffiliation(affiliation);
-            }
-
-    //            registrationRequest.setMaxEnrollments(); ??
-
-            if (!EmptyUtils.isBlack(enrollSecret)) {
-                registrationRequest.setSecret(enrollSecret);
-            }
-
-    //            registrationRequest.setType(); ??
-
-            if (!EmptyUtils.isEmpty(attrs)) {
-                for (Attribute attr : attrs) {
-                    if (EmptyUtils.isBlack(attr.getName())) {
-                        throw new HFSCADKException("属性名称不能为空");
-                    }
-                    registrationRequest.addAttribute(attr);
-                }
-            }
-
+            // 登记员
             User registrar = new User() {
                 @Override
                 public String getName() {
-                    return enrollId;
+                    return admin;
                 }
 
                 @Override
@@ -121,7 +72,7 @@ public class CASDK extends ISdk {
 
                 @Override
                 public String getAffiliation() {
-                    return affiliation;
+                    return null;
                 }
 
                 @Override
@@ -135,6 +86,53 @@ public class CASDK extends ISdk {
                 }
             };
 
+            return register(client, registrar, affiliation, enrollId, enrollSecret, attrs);
+        } catch (InvalidArgumentException e) {
+            throw new HFSCADKException("InvalidArgumentException", e);
+        } catch (Exception e) {
+            throw new HFSCADKException(e);
+        }
+    }
+    public static String register (HFCAClient client,
+                                   User registrar,
+                                   String affiliation,
+                                   String enrollId,
+                                   String enrollSecret,
+                                   Collection<Attribute> attrs) throws HFSCADKException {
+
+        if (EmptyUtils.isBlack(enrollId)) {
+            throw new HFSCADKException("'enrollId' 不能为空");
+        }
+
+        if (registrar == null || registrar.getEnrollment() == null) {
+            throw new HFSCADKException("管理员信息为空，将不能访问到CA");
+        }
+
+        try {
+            // register的时候在registrationRequest中增加自定义属性
+            RegistrationRequest registrationRequest = new RegistrationRequest(enrollId); // setEnrollmentID
+
+            if (!EmptyUtils.isBlack(affiliation)) {
+                registrationRequest.setAffiliation(affiliation);
+            }
+
+            // Maximum number of times a password/secret can be reused for enrollment
+            // (default: -1, which means there is no limit)
+            registrationRequest.setMaxEnrollments(-1);
+
+            if (!EmptyUtils.isBlack(enrollSecret)) {
+                registrationRequest.setSecret(enrollSecret);
+            }
+
+            if (!EmptyUtils.isEmpty(attrs)) {
+                for (Attribute attr : attrs) {
+                    if (EmptyUtils.isBlack(attr.getName())) {
+                        throw new HFSCADKException("属性名称不能为空");
+                    }
+                    registrationRequest.addAttribute(attr);
+                }
+            }
+
             return client.register(registrationRequest, registrar);
 
         } catch (RegistrationException e) {
@@ -147,7 +145,7 @@ public class CASDK extends ISdk {
     }
 
     /**
-     * @Description: 用户注册
+     * @Description: 用户登记
      * @param client
      * @param enrollId 待登记的用户ID
      * @param enrollSecret 用户登记时的密码
@@ -157,7 +155,10 @@ public class CASDK extends ISdk {
      * @Author: aliyz
      * @Date: 2020-08-12 18:03
      **/
-    public static Enrollment enroll (HFCAClient client, String enrollId, String enrollSecret, String ... attrs) throws HFSCADKException {
+    public static Enrollment enroll (HFCAClient client,
+                                     String enrollId,
+                                     String enrollSecret,
+                                     Collection<String> attrs) throws HFSCADKException {
 
         try {
             //定义一个enrollmentRequest，在里面设置需要加入到证书中的属性
@@ -165,9 +166,10 @@ public class CASDK extends ISdk {
             //没有加入到证书中的属性也是可以在链码中读取的
             EnrollmentRequest enrollmentRequest = new EnrollmentRequest();
 
-            if (attrs != null && attrs.length == 0) {
+
+            if (attrs != null && attrs.size() == 0) {
                 enrollmentRequest.addAttrReq();
-            } else if (attrs != null && attrs.length > 0) {
+            } else if (attrs != null && attrs.size() > 0) {
                 for (String attr : attrs) {
                     enrollmentRequest.addAttrReq(attr);		//default attribute
                 }
@@ -184,8 +186,207 @@ public class CASDK extends ISdk {
         }
     }
 
-    public static void verif (HFCAClient client) throws Exception {
-//        client.newHFCAAffiliation("");
-//        client.setCryptoSuite();
+    public static boolean createIdentity (HFCAClient client,
+                                          String admin,
+                                          String adminpw,
+                                          String affiliation,
+                                          String enrollId,
+                                          String enrollSecret,
+                                          Collection<Attribute> attrs) throws HFSCADKException {
+
+        if (EmptyUtils.isBlack(admin) || EmptyUtils.isBlack(adminpw)) {
+            throw new HFSCADKException("管理员信息为空，将不能访问到CA");
+        }
+
+        try {
+            Enrollment adminEnrollment = client.enroll(admin, adminpw);
+
+            // 登记员
+            User registrar = new User() {
+                @Override
+                public String getName() {
+                    return admin;
+                }
+
+                @Override
+                public Set<String> getRoles() {
+                    return null;
+                }
+
+                @Override
+                public String getAccount() {
+                    return null;
+                }
+
+                @Override
+                public String getAffiliation() {
+                    return null;
+                }
+
+                @Override
+                public Enrollment getEnrollment() {
+                    return adminEnrollment;
+                }
+
+                @Override
+                public String getMspId() {
+                    return null;
+                }
+            };
+
+            return createIdentity(client, registrar, affiliation, enrollId, enrollSecret, attrs);
+        } catch (InvalidArgumentException e) {
+            throw new HFSCADKException("InvalidArgumentException", e);
+        } catch (Exception e) {
+            throw new HFSCADKException(e);
+        }
+    }
+    /**
+     * @Description: 创建身份，身份类型有：user、peer
+     *
+     * @param client
+     * @param registrar
+     * @param affiliation
+     * @param enrollId
+     * @param enrollSecret
+     * @param attrs
+     * @return: 创建成功/失败：true/false
+     * @Author: aliyz
+     * @Date: 2020-08-13 14:53
+     **/
+    public static boolean createIdentity (HFCAClient client,
+                                      User registrar,
+                                      String affiliation,
+                                      String enrollId,
+                                      String enrollSecret,
+                                      Collection<Attribute> attrs) throws HFSCADKException {
+        if (EmptyUtils.isBlack(enrollId)) {
+            throw new HFSCADKException("'enrollId' 不能为空");
+        }
+
+        if (registrar == null) {
+            throw new HFSCADKException("管理员信息为空，将不能访问到CA");
+        }
+
+        try {
+
+            HFCAIdentity newIdentity = client.newHFCAIdentity(enrollId);
+
+            if (!EmptyUtils.isBlack(affiliation)) {
+                newIdentity.setAffiliation(affiliation);
+            }
+
+            newIdentity.setMaxEnrollments(-1);
+
+            if (!EmptyUtils.isBlack(enrollSecret)) {
+                newIdentity.setSecret(enrollSecret);
+            }
+
+            if (!EmptyUtils.isEmpty(attrs)) {
+                newIdentity.setAttributes(attrs);
+            }
+
+//            newIdentity.setType("peer");
+
+            int status = newIdentity.create(registrar);
+
+            return (201 == status);
+        } catch (IdentityException e) {
+            throw new HFSCADKException("IdentityException", e);
+        } catch (InvalidArgumentException e) {
+            throw new HFSCADKException("InvalidArgumentException", e);
+        } catch (Exception e) {
+            throw new HFSCADKException(e);
+        }
+    }
+
+    public static boolean createAffiliation (HFCAClient client,
+                                             String admin,
+                                             String adminpw,
+                                             String affiliation) throws HFSCADKException {
+
+        if (EmptyUtils.isBlack(admin) || EmptyUtils.isBlack(adminpw)) {
+            throw new HFSCADKException("管理员信息为空，将不能访问到CA");
+        }
+
+        try {
+            Enrollment adminEnrollment = client.enroll(admin, adminpw);
+
+            // 登记员
+            User registrar = new User() {
+                @Override
+                public String getName() {
+                    return admin;
+                }
+
+                @Override
+                public Set<String> getRoles() {
+                    return null;
+                }
+
+                @Override
+                public String getAccount() {
+                    return null;
+                }
+
+                @Override
+                public String getAffiliation() {
+                    return null;
+                }
+
+                @Override
+                public Enrollment getEnrollment() {
+                    return adminEnrollment;
+                }
+
+                @Override
+                public String getMspId() {
+                    return null;
+                }
+            };
+
+            return createAffiliation(client, registrar, affiliation);
+        } catch (InvalidArgumentException e) {
+            throw new HFSCADKException("InvalidArgumentException", e);
+        } catch (Exception e) {
+            throw new HFSCADKException(e);
+        }
+    }
+    /**
+     * @Description: 新建联盟
+     *
+     * @param client
+     * @param registrar
+     * @param affiliation 联盟名称
+     * @return: 创建成功/失败：true/false
+     * @Author: aliyz
+     * @Date: 2020-08-13 17:41
+     **/
+    public static boolean createAffiliation (HFCAClient client,
+                                      User registrar,
+                                      String affiliation) throws HFSCADKException {
+
+        if (EmptyUtils.isBlack(affiliation)) {
+            throw new HFSCADKException("'affiliation' 不能为空");
+        }
+
+        if (registrar == null || registrar.getEnrollment() == null) {
+            throw new HFSCADKException("管理员信息为空，将不能访问到CA");
+        }
+
+        try {
+
+            HFCAAffiliation newAffiliation = client.newHFCAAffiliation(affiliation);
+
+            HFCAAffiliation.HFCAAffiliationResp affiliationResp = newAffiliation.create(registrar);
+
+            return (201 == affiliationResp.getStatusCode());
+        } catch (AffiliationException e) {
+            throw new HFSCADKException("AffiliationException", e);
+        } catch (InvalidArgumentException e) {
+            throw new HFSCADKException("InvalidArgumentException", e);
+        } catch (Exception e) {
+            throw new HFSCADKException(e);
+        }
     }
 }

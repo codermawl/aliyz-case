@@ -7,15 +7,16 @@ import com.aliyz.fabric.sdk.utils.HFSDKUtils;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
-import org.hyperledger.fabric.gateway.Wallet;
 import org.hyperledger.fabric.sdk.*;
 import org.hyperledger.fabric.sdk.security.CryptoSuite;
 import org.hyperledger.fabric.sdk.security.CryptoSuiteFactory;
+import org.hyperledger.fabric_ca.sdk.Attribute;
+import org.hyperledger.fabric_ca.sdk.HFCAAffiliation;
 import org.hyperledger.fabric_ca.sdk.HFCAClient;
+import org.hyperledger.fabric_ca.sdk.HFCAIdentity;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.file.Paths;
@@ -214,7 +215,8 @@ public class ISdkTest {
             CryptoSuite cryptoSuite = CryptoSuiteFactory.getDefault().getCryptoSuite();
             client.setCryptoSuite(cryptoSuite);
 
-            String secret = CASDK.register(client, "", "admin", "adminpw", "aliyz", "aliyzpw", null);
+            Collection<Attribute> attrs = Arrays.asList(new Attribute("hf.AffiliationMgr", "true"));
+            String secret = CASDK.register(client, "org.department2", "admin", "adminpw", "aliyz10", "aliyz10pw", attrs);
             System.out.println("-------------- enrollSecret -------------" + secret);
 
         } catch (Exception e) {
@@ -236,8 +238,106 @@ public class ISdkTest {
             CryptoSuite cryptoSuite = CryptoSuiteFactory.getDefault().getCryptoSuite();
             client.setCryptoSuite(cryptoSuite);
 
-            Enrollment enrollment = CASDK.enroll(client, "aliyz", "aliyzpw");
+            Enrollment enrollment = CASDK.enroll(client, "aliyz12", "aliyz12pw", null);
             System.out.println("-------------- enrollment -------------" + enrollment);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void getAffiliationsTest () {
+        System.out.println("---------------^^ 所属机构列表 ^^--------------");
+
+        try {
+            Properties props = new Properties();
+            props.put("pemFile",
+                    "/Users/mawl/Workspace/deploy/fabric/organizations/fabric-ca/org/tls-cert.pem");
+            props.put("allowAllHostNames", "true");
+
+            HFCAClient client = HFCAClient.createNewInstance("https://localhost:7054", props);
+            CryptoSuite cryptoSuite = CryptoSuiteFactory.getDefault().getCryptoSuite();
+            client.setCryptoSuite(cryptoSuite);
+
+            User registrar = new User() {
+                @Override
+                public String getName() {
+                    return null;
+                }
+
+                @Override
+                public Set<String> getRoles() {
+                    return null;
+                }
+
+                @Override
+                public String getAccount() {
+                    return null;
+                }
+
+                @Override
+                public String getAffiliation() {
+                    return null;
+                }
+
+                @Override
+                public Enrollment getEnrollment() {
+                    return CASDK.enroll(client, "admin", "adminpw", null);
+                }
+
+                @Override
+                public String getMspId() {
+                    return null;
+                }
+            };
+
+            HFCAAffiliation affiliation = client.getHFCAAffiliations(registrar);
+            Collection<HFCAIdentity> identities = client.getHFCAIdentities(registrar);
+
+            System.out.println("-------------- affiliation -------------" + JSON.toJSONString(affiliation.getChildren()));
+            System.out.println("-------------- identities -------------" + JSON.toJSONString(identities));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void createIdentityTest () {
+        System.out.println("---------------^^ 创建身份 ^^--------------");
+
+        try {
+            Properties props = new Properties();
+            props.put("pemFile",
+                    "/Users/mawl/Workspace/deploy/fabric/organizations/fabric-ca/org/tls-cert.pem");
+            props.put("allowAllHostNames", "true");
+
+            HFCAClient client = HFCAClient.createNewInstance("https://localhost:7054", props);
+            CryptoSuite cryptoSuite = CryptoSuiteFactory.getDefault().getCryptoSuite();
+            client.setCryptoSuite(cryptoSuite);
+
+            boolean result = CASDK.createIdentity(client, "admin", "adminpw", "org.department2", "user1", "user1pw", null);
+            System.out.println("-------------- result -------------" + result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void createAffiliationTest () {
+        System.out.println("---------------^^ 创建联盟 ^^--------------");
+
+        try {
+            Properties props = new Properties();
+            props.put("pemFile",
+                    "/Users/mawl/Workspace/deploy/fabric/organizations/fabric-ca/org/tls-cert.pem");
+            props.put("allowAllHostNames", "true");
+
+            HFCAClient client = HFCAClient.createNewInstance("https://localhost:7054", props);
+            CryptoSuite cryptoSuite = CryptoSuiteFactory.getDefault().getCryptoSuite();
+            client.setCryptoSuite(cryptoSuite);
+
+            boolean result = CASDK.createAffiliation(client, "admin", "adminpw", "org.department3");
+            System.out.println("-------------- result -------------" + result);
         } catch (Exception e) {
             e.printStackTrace();
         }

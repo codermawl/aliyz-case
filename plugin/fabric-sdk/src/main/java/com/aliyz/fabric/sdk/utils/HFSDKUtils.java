@@ -57,5 +57,4 @@ public class HFSDKUtils {
 
         return chaincodeName.concat("_").concat(chaincodeVersion);
     }
-
 }

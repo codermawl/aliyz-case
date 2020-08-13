@@ -38,9 +38,13 @@ public class HFSCADKException extends RuntimeException {
         } else if ("TransactionException".equals(type)) {
             this.errMessage = String.format("请求Fabric-CA网络，交易提交异常！%s", message);
         } else if ("RegistrationException".equals(type)) {
-            this.errMessage = String.format("请求Fabric-CA网络，用户登记异常！%s", message);
-        } else if ("EnrollmentException".equals(type)) {
             this.errMessage = String.format("请求Fabric-CA网络，用户注册异常！%s", message);
+        } else if ("EnrollmentException".equals(type)) {
+            this.errMessage = String.format("请求Fabric-CA网络，用户登记异常！%s", message);
+        } else if ("IdentityException".equals(type)) {
+            this.errMessage = String.format("请求Fabric-CA网络，身份操作异常！%s", message);
+        } else if ("AffiliationException".equals(type)) {
+            this.errMessage = String.format("请求Fabric-CA网络，联盟操纵异常！%s", message);
         } else {
             this.errMessage = String.format("Fabric-CA SDK 运行时异常！%s", message);
         }
