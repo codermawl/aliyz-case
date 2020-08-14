@@ -15,11 +15,11 @@ import java.util.*;
 import static org.hyperledger.fabric.sdk.Channel.PeerOptions.createPeerOptions;
 
 /**
- * All rights Reserved, Designed By www.tusdao.com
+ * All rights Reserved, Designed By www.aliyz.com
  *
  * <p></p>
- * Created by mawl at 2020-08-07 15:12
- * Copyright: 2020 www.tusdao.com Inc. All rights reserved.
+ * Created by aliyz at 2020-08-07 15:12
+ * Copyright: 2020 www.aliyz.com Inc. All rights reserved.
  */
 public class CHSDK extends ISdk {
 
@@ -45,7 +45,7 @@ public class CHSDK extends ISdk {
      * @param createFabricChannel
      * @param channelTxPath 如：./channel-artifacts
      * @return:
-     * @Author: mawl
+     * @Author: aliyz
      * @Date: 2020-08-04 11:21
      **/
     public static Channel constructChannel (HFClient client,

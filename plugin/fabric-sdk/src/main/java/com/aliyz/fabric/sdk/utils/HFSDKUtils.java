@@ -12,7 +12,7 @@ import java.util.Collection;
  * All rights Reserved, Designed By www.aliyz.com
  *
  * <p></p>
- * Created by mawl at 2020-08-05 10:46
+ * Created by aliyz at 2020-08-05 10:46
  * Copyright: 2020 www.aliyz.com Inc. All rights reserved.
  */
 public class HFSDKUtils {

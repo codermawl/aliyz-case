@@ -117,10 +117,10 @@ organizations:
     #      - ca-org1
     adminPrivateKey:
       #      path: src/test/fixture/sdkintegration/aliyz/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/priv_sk
-      path: /Users/mawl/Workspace/go/src/github.com/hyperledger/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/priv_sk
+      path: /Users/aliyz/Workspace/go/src/github.com/hyperledger/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/priv_sk
     signedCert:
       #      path: src/test/fixture/sdkintegration/aliyz/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem
-      path: /Users/mawl/Workspace/go/src/github.com/hyperledger/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem
+      path: /Users/aliyz/Workspace/go/src/github.com/hyperledger/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem
 
   Org2:
     mspid: Org2MSP
@@ -128,10 +128,10 @@ organizations:
       - peer0.org2.example.com
     adminPrivateKey:
       #      path: src/test/fixture/sdkintegration/aliyz/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/priv_sk
-      path: /Users/mawl/Workspace/go/src/github.com/hyperledger/fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/priv_sk
+      path: /Users/aliyz/Workspace/go/src/github.com/hyperledger/fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/priv_sk
     signedCert:
       #      path: src/test/fixture/sdkintegration/aliyz/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/Admin@org2.example.com-cert.pem
-      path: /Users/mawl/Workspace/go/src/github.com/hyperledger/fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/Admin@org2.example.com-cert.pem
+      path: /Users/aliyz/Workspace/go/src/github.com/hyperledger/fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/Admin@org2.example.com-cert.pem
 
 
 #
@@ -152,7 +152,7 @@ orderers:
       grpc.keepalive_timeout_ms: 180000
       grpc.keepalive_without_calls: true
     tlsCACerts:
-      path: /Users/mawl/Workspace/go/src/github.com/hyperledger/fabric-samples/test-network/organizations/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem
+      path: /Users/aliyz/Workspace/go/src/github.com/hyperledger/fabric-samples/test-network/organizations/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem
 
 #
 # List of peers to send various requests to, including endorsement, query
@@ -171,7 +171,7 @@ peers:
     #      # TODO: The following causes a NoSuchMethodException to be thrown when sending proposals to the peer...
     #      # grpc.NettyChannelBuilderOption.maxInboundMessageSize: 9000000
     tlsCACerts:
-      path: /Users/mawl/Workspace/go/src/github.com/hyperledger/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/server.crt
+      path: /Users/aliyz/Workspace/go/src/github.com/hyperledger/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/server.crt
 
   peer0.org2.example.com:
     url: grpcs://localhost:9051
@@ -184,7 +184,7 @@ peers:
       # TODO: The following causes a NoSuchMethodException to be thrown when sending proposals to the peer...
       # grpc.NettyChannelBuilderOption.maxInboundMessageSize: 9000000
     tlsCACerts:
-      path: /Users/mawl/Workspace/go/src/github.com/hyperledger/fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/server.crt
+      path: /Users/aliyz/Workspace/go/src/github.com/hyperledger/fabric-samples/test-network/organizations/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/server.crt
 
 #
 # Fabric-CA is a special kind of Certificate Authority provided by Hyperledger Fabric which allows

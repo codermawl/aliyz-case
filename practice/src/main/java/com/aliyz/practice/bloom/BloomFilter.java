@@ -9,7 +9,7 @@ import java.util.BitSet;
  * All rights Reserved, Designed By www.aliyz.com
  *
  * <p></p>
- * Created by mawl at 2020-07-30 15:05
+ * Created by aliyz at 2020-07-30 15:05
  * Copyright: 2020 www.aliyz.com Inc. All rights reserved.
  */
 public class BloomFilter implements Serializable {

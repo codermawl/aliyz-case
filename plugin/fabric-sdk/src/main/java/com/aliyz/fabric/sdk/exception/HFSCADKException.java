@@ -4,7 +4,7 @@ package com.aliyz.fabric.sdk.exception;
  * All rights Reserved, Designed By www.aliyz.com
  *
  * <p></p>
- * Created by mawl at 2020-08-06 09:53
+ * Created by aliyz at 2020-08-06 09:53
  * Copyright: 2020 www.aliyz.com Inc. All rights reserved.
  */
 public class HFSCADKException extends RuntimeException {

@@ -27,7 +27,7 @@ import static java.lang.String.format;
  *      2.11、链码更新
  *      2.12、链码下链
  * </p>
- * Create by mawl at 2020-08-04 10:57
+ * Create by aliyz at 2020-08-04 10:57
  * Copyright: 2020 www.aliyz.com Inc. All rights reserved.
  */
 public abstract class ISdk {

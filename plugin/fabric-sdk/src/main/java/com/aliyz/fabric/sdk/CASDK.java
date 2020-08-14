@@ -11,22 +11,23 @@ import java.util.Collection;
 import java.util.Set;
 
 /**
- * All rights Reserved, Designed By www.tusdao.com
+ * All rights Reserved, Designed By www.aliyz.com
  *
  * <p></p>
  *
  * CA:
  *  用户信息的登记与注册，数字证书的颁发与管理
  *
- *  证书吊销、机构注册 ？？
+ *  证书吊销、机构注册
  *
- * Created by mawl at 2020-08-12 14:20
- * Copyright: 2020 www.tusdao.com Inc. All rights reserved.
+ * Created by aliyz at 2020-08-12 14:20
+ * Copyright: 2020 www.aliyz.com Inc. All rights reserved.
  */
 public class CASDK extends ISdk {
 
     /**
      * @Description: 用户注册
+     *
      * @param client
      * @param affiliation 所属机构
      * @param admin 结构管理员ID
@@ -34,6 +35,7 @@ public class CASDK extends ISdk {
      * @param enrollId 待登记的用户ID
      * @param enrollSecret 自定义用户密码
      * @param attrs 用户自定义的一些属性信息
+     *
      * @return: enroll secret，如果参数 enrollSecret 为空，则CA返回随机密码，否则返回传入的 enrollSecret 值
      * @Author: aliyz
      * @Date: 2020-08-12 18:00
@@ -93,6 +95,7 @@ public class CASDK extends ISdk {
             throw new HFSCADKException(e);
         }
     }
+
     public static String register (HFCAClient client,
                                    User registrar,
                                    String affiliation,
@@ -146,11 +149,13 @@ public class CASDK extends ISdk {
 
     /**
      * @Description: 用户登记
+     *
      * @param client
      * @param enrollId 待登记的用户ID
      * @param enrollSecret 用户登记时的密码
      * @param attrs 需要写入证书的属性，这些属性必须是在用户Register时登记过的，如果 length=0，则所有属性都不写入证书
      *              如果 =null，则只写入默认属性（hf.Affiliation, hf.EnrollmentID, hf.Type）
+     *
      * @return: 用户私钥和证书
      * @Author: aliyz
      * @Date: 2020-08-12 18:03
@@ -241,6 +246,7 @@ public class CASDK extends ISdk {
             throw new HFSCADKException(e);
         }
     }
+
     /**
      * @Description: 创建身份，身份类型有：user、peer
      *
@@ -250,6 +256,7 @@ public class CASDK extends ISdk {
      * @param enrollId
      * @param enrollSecret
      * @param attrs
+     *
      * @return: 创建成功/失败：true/false
      * @Author: aliyz
      * @Date: 2020-08-13 14:53
@@ -358,6 +365,7 @@ public class CASDK extends ISdk {
      * @param client
      * @param registrar
      * @param affiliation 联盟名称
+     *
      * @return: 创建成功/失败：true/false
      * @Author: aliyz
      * @Date: 2020-08-13 17:41

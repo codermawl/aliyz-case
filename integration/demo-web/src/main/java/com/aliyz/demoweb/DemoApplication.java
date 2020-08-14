@@ -11,7 +11,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * All rights Reserved, Designed By www.aliyz.com
  *
  * <p></p>
- * Created by mawl at 2020-08-03 14:26
+ * Created by aliyz at 2020-08-03 14:26
  * Copyright: 2020 www.aliyz.com Inc. All rights reserved.
  */
 @SpringBootApplication

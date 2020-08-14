@@ -102,7 +102,7 @@ public class Quicksort4SinglyLinkedList {
      * @Description: 构造单链表
      * @param keys
      * @return: com.aliyz.alg.sort.Quicksort4SinglyLinkedList.SLL
-     * @Author: mawl
+     * @Author: aliyz
      * @Date: 2020-06-24 19:21
      **/
     private static SLL buildSLL(int[] keys) {

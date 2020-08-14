@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  * All rights Reserved, Designed By www.aliyz.com
  *
  * <p></p>
- * Created by mawl at 2020-08-04 10:11
+ * Created by aliyz at 2020-08-04 10:11
  * Copyright: 2020 www.aliyz.com Inc. All rights reserved.
  */
 public class ISdkTest {
@@ -44,9 +44,9 @@ public class ISdkTest {
 
 
 
-    private static final String CHAIN_CODE_SOURCE_PATH = "/Users/mawl/Workspace/java/code.tusdao.com/fabric/fabric-sdk-java/src/test/fixture/sdkintegration/gocc/sample1";
-    private static final String CHAIN_CODE_METAINFO_PATH = "/Users/mawl/Workspace/java/code.tusdao.com/fabric/fabric-sdk-java/src/test/fixture/meta-infs/end2endit";
-    private static final String CHANNEL_TX_SOURCE_PATH = "/Users/mawl/Workspace/deploy/fabric/channel-artifacts";
+    private static final String CHAIN_CODE_SOURCE_PATH = "/Users/aliyz/Workspace/java/code.tusdao.com/fabric/fabric-sdk-java/src/test/fixture/sdkintegration/gocc/sample1";
+    private static final String CHAIN_CODE_METAINFO_PATH = "/Users/aliyz/Workspace/java/code.tusdao.com/fabric/fabric-sdk-java/src/test/fixture/meta-infs/end2endit";
+    private static final String CHANNEL_TX_SOURCE_PATH = "/Users/aliyz/Workspace/deploy/fabric/channel-artifacts";
     private static final String CHAIN_CODE_PATH = "github.com";
     private static final String CHAIN_CODE_NAME = "example_cc";
     private static final String CHAIN_CODE_VERSION = "1.0";
@@ -117,11 +117,11 @@ public class ISdkTest {
             String chaincodeLabel = HFSDKUtils.genSampleChaincodeLabel(chaincodeName, chaincodeVersion);
 
             LifecycleChaincodeEndorsementPolicy lccEndorsementPolicy = LifecycleChaincodeEndorsementPolicy.fromSignaturePolicyYamlFile(
-                    Paths.get("/Users/mawl/Workspace/java/code.aliyz.com/aliyz-case/plugin/fabric-sdk/src/main/resources/policy-config/org1.chaincode-endorsement_policy.yaml"));
+                    Paths.get("/Users/aliyz/Workspace/java/code.aliyz.com/aliyz-case/plugin/fabric-sdk/src/main/resources/policy-config/org1.chaincode-endorsement_policy.yaml"));
 
             // TODO
             ChaincodeCollectionConfiguration ccCollectionConfiguration = ChaincodeCollectionConfiguration.fromYamlFile(
-                    new File("/Users/mawl/Workspace/java/code.aliyz.com/aliyz-case/plugin/fabric-sdk/src/main/resources/coll-config/org1.collection-config.yaml"));
+                    new File("/Users/aliyz/Workspace/java/code.aliyz.com/aliyz-case/plugin/fabric-sdk/src/main/resources/coll-config/org1.collection-config.yaml"));
 
             Collection<Peer> org1Peers = HFSDKUtils.extractPeersFromChannel(channel, org1PeerNames);
 //            Collection<Peer> org2Peers = HFSDKUtils.extractPeersFromChannel(channel, org2PeerNames);
@@ -208,7 +208,7 @@ public class ISdkTest {
 
             Properties props = new Properties();
             props.put("pemFile",
-                    "/Users/mawl/Workspace/deploy/fabric/organizations/fabric-ca/org/tls-cert.pem");
+                    "/Users/aliyz/Workspace/deploy/fabric/organizations/fabric-ca/org/tls-cert.pem");
             props.put("allowAllHostNames", "true");
 
             HFCAClient client = HFCAClient.createNewInstance("https://localhost:7054", props);
@@ -231,7 +231,7 @@ public class ISdkTest {
         try {
             Properties props = new Properties();
             props.put("pemFile",
-                    "/Users/mawl/Workspace/deploy/fabric/organizations/fabric-ca/org/tls-cert.pem");
+                    "/Users/aliyz/Workspace/deploy/fabric/organizations/fabric-ca/org/tls-cert.pem");
             props.put("allowAllHostNames", "true");
 
             HFCAClient client = HFCAClient.createNewInstance("https://localhost:7054", props);
@@ -252,7 +252,7 @@ public class ISdkTest {
         try {
             Properties props = new Properties();
             props.put("pemFile",
-                    "/Users/mawl/Workspace/deploy/fabric/organizations/fabric-ca/org/tls-cert.pem");
+                    "/Users/aliyz/Workspace/deploy/fabric/organizations/fabric-ca/org/tls-cert.pem");
             props.put("allowAllHostNames", "true");
 
             HFCAClient client = HFCAClient.createNewInstance("https://localhost:7054", props);
@@ -308,7 +308,7 @@ public class ISdkTest {
         try {
             Properties props = new Properties();
             props.put("pemFile",
-                    "/Users/mawl/Workspace/deploy/fabric/organizations/fabric-ca/org/tls-cert.pem");
+                    "/Users/aliyz/Workspace/deploy/fabric/organizations/fabric-ca/org/tls-cert.pem");
             props.put("allowAllHostNames", "true");
 
             HFCAClient client = HFCAClient.createNewInstance("https://localhost:7054", props);
@@ -329,7 +329,7 @@ public class ISdkTest {
         try {
             Properties props = new Properties();
             props.put("pemFile",
-                    "/Users/mawl/Workspace/deploy/fabric/organizations/fabric-ca/org/tls-cert.pem");
+                    "/Users/aliyz/Workspace/deploy/fabric/organizations/fabric-ca/org/tls-cert.pem");
             props.put("allowAllHostNames", "true");
 
             HFCAClient client = HFCAClient.createNewInstance("https://localhost:7054", props);

@@ -6,7 +6,7 @@ import java.util.Scanner;
  * All rights Reserved, Designed By www.aliyz.com
  *
  * <p></p>
- * Created by mawl at 2020-06-28 14:51
+ * Created by aliyz at 2020-06-28 14:51
  * Copyright: 2020 www.aliyz.com Inc. All rights reserved.
  */
 public class Main {

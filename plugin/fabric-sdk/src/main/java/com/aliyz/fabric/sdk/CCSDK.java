@@ -17,11 +17,11 @@ import java.util.concurrent.CompletableFuture;
 import static java.lang.String.format;
 
 /**
- * All rights Reserved, Designed By www.tusdao.com
+ * All rights Reserved, Designed By www.aliyz.com
  *
  * <p></p>
- * Created by mawl at 2020-08-07 15:13
- * Copyright: 2020 www.tusdao.com Inc. All rights reserved.
+ * Created by aliyz at 2020-08-07 15:13
+ * Copyright: 2020 www.aliyz.com Inc. All rights reserved.
  */
 public class CCSDK extends ISdk {
 

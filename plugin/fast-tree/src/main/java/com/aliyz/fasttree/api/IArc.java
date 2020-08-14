@@ -7,7 +7,7 @@ import com.sun.istack.internal.NotNull;
  *
  * Interface for Sample tree arc，provide uniform standards for all arcs
  * @version 2019-11-28 11:07
- * @author: mawl
+ * @author: aliyz
  * @Copyright: 2019 www.aliyz.com Inc. All rights reserved.
  *
  * Note: this content is limited to internal circulation of @me,

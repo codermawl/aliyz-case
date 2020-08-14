@@ -7,7 +7,7 @@ import com.sun.istack.internal.NotNull;
  *
  * Interface for Sample tree node，provide uniform standards for all nodes
  * @version 2019-11-28 11:07
- * @author: mawl
+ * @author: aliyz
  * @Copyright: 2019 www.aliyz.com Inc. All rights reserved.
  *
  * Note: this content is limited to internal circulation of 北京启迪区块链科技发展有限公司,
