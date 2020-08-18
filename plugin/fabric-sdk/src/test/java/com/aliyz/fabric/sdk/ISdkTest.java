@@ -10,6 +10,7 @@ import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.hyperledger.fabric.sdk.*;
 import org.hyperledger.fabric.sdk.security.CryptoSuite;
 import org.hyperledger.fabric.sdk.security.CryptoSuiteFactory;
+import org.hyperledger.fabric.shim.ChaincodeBase;
 import org.hyperledger.fabric_ca.sdk.Attribute;
 import org.hyperledger.fabric_ca.sdk.HFCAAffiliation;
 import org.hyperledger.fabric_ca.sdk.HFCAClient;
@@ -201,6 +202,7 @@ public class ISdkTest {
 
 
     @Test
+    // 用户注册
     public void registerTest () {
         System.out.println("---------------^^ 用户登记 ^^--------------");
 
@@ -225,6 +227,7 @@ public class ISdkTest {
     }
 
     @Test
+    // 用户登记、获取证书
     public void enrollTest () {
         System.out.println("---------------^^ 用户注册 ^^--------------");
 
@@ -302,6 +305,7 @@ public class ISdkTest {
     }
 
     @Test
+    // 创建身份
     public void createIdentityTest () {
         System.out.println("---------------^^ 创建身份 ^^--------------");
 
@@ -323,6 +327,7 @@ public class ISdkTest {
     }
 
     @Test
+    // 创建联盟
     public void createAffiliationTest () {
         System.out.println("---------------^^ 创建联盟 ^^--------------");
 
@@ -382,5 +387,7 @@ public class ISdkTest {
         }
         return null;
     }
+
+    ChaincodeBase cb = null;
 
 }

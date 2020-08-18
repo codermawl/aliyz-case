@@ -363,7 +363,7 @@ public class CASDK extends ISdk {
      * @Description: 新建联盟
      *
      * @param client
-     * @param registrar
+     * @param registrar 登记员
      * @param affiliation 联盟名称
      *
      * @return: 创建成功/失败：true/false

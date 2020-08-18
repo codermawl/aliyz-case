@@ -1,4 +1,4 @@
-package com.aliyz.practice.dyproxy;
+package com.aliyz.javabasic.dyproxy;
 
 /**
  * All rights Reserved, Designed By www.aliyz.com

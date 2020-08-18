@@ -28,6 +28,11 @@
             <artifactId>fabric-gateway-java</artifactId>
             <version>${fabric-gateway-java.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.hyperledger.fabric-chaincode-java</groupId>
+            <artifactId>fabric-chaincode-shim</artifactId>
+            <version>${fabric-chaincode-shim.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>

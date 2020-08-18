@@ -1,4 +1,4 @@
-package com.aliyz.practice.dyproxy;
+package com.aliyz.javabasic.dyproxy;
 
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;

@@ -1,4 +1,4 @@
-package com.aliyz.practice.dyproxy;
+package com.aliyz.javabasic.dyproxy;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

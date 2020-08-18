@@ -1,4 +1,4 @@
-package com.aliyz.practice.dyproxy;
+package com.aliyz.javabasic.dyproxy;
 
 import org.junit.Test;
 
@@ -18,7 +18,7 @@ public class DynamicProxyTest {
         // 1-1. new 关键字直接创建
         Subject subject = new SubjectImpl();
         // 1-2. 反射实例化对象
-        Subject rf_subject = (Subject) Class.forName("com.aliyz.practice.dyproxy.SubjectImpl").newInstance();
+        Subject rf_subject = (Subject) Class.forName("com.aliyz.javabasic.dyproxy.SubjectImpl").newInstance();
 
         // 2. 创建代理对象
         SubjectProxy subjectProxy = new SubjectProxy(rf_subject);

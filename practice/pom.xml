@@ -11,7 +11,20 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>practice</artifactId>
+    <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
+    <modules>
+        <module>java-basic</module>
+        <module>fabric-chaincode</module>
+        <module>hbase-client</module>
+    </modules>
+
+    <properties>
+        <spring-context.version>5.2.8.RELEASE</spring-context.version>
+        <spring-beans.version>5.2.8.RELEASE</spring-beans.version>
+        <spring-core.version>5.2.8.RELEASE</spring-core.version>
+        <hbase-client.version>2.3.0</hbase-client.version>
+    </properties>
 
     <dependencies>
         <dependency>
